@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "cohort": "바이브코딩 2기",
+    "campaignName": "바이브코딩 2기 · 알림신청",
+    "adAccountId": "302364841487753",
+    "campaignIds": [
+      "120253576478460198"
+    ],
+    "lastUpdated": "2026-08-18T00:00:00.000Z",
+    "note": "원본값만 저장한다. CPA·달성률·예상착지·기대수익 등 파생값은 프론트에서 계산. 대상 캠페인 = 바이브코딩 강의 2기(120253576478460198) 단일. 바이브코딩_상시용·1기는 별도 상품이라 제외."
+  },
+  "goals": {
+    "targetLeads": 30000,
+    "stretchLeads": 30000,
+    "totalBudget": 150000000,
+    "aov": 1000000,
+    "conversionBand": {
+      "low": 0.03,
+      "high": 0.0617
+    },
+    "planConversion": 0.03,
+    "cpaHardCap": 5500,
+    "signalGreenMax": 4500,
+    "signalYellowMax": 5500,
+    "signalFreezeMax": 6200,
+    "lateCapFrom": "2026-09-08",
+    "targetCpa": 5000,
+    "startDate": "2026-08-18",
+    "webinarDate": "2026-09-10",
+    "liveDates": [
+      "2026-09-08",
+      "2026-09-10"
+    ]
+  },
+  "planBase": {
+    "asOf": "2026-08-17",
+    "leads": 0,
+    "spend": 0
+  },
+  "plan": [
+    {
+      "from": "2026-08-18",
+      "to": "2026-08-24",
+      "days": 7,
+      "perDay": 430,
+      "dailyBudget": 1541000,
+      "targetCpa": 3584
+    },
+    {
+      "from": "2026-08-25",
+      "to": "2026-08-31",
+      "days": 7,
+      "perDay": 780,
+      "dailyBudget": 3270000,
+      "targetCpa": 4192
+    },
+    {
+      "from": "2026-09-01",
+      "to": "2026-09-07",
+      "days": 7,
+      "perDay": 1370,
+      "dailyBudget": 6850000,
+      "targetCpa": 5000
+    },
+    {
+      "from": "2026-09-08",
+      "to": "2026-09-10",
+      "days": 3,
+      "perDay": 3980,
+      "dailyBudget": 22791000,
+      "targetCpa": 5726
+    }
+  ],
+  "daily": [],
+  "adsets": []
+}

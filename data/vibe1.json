@@ -1,0 +1,407 @@
+{
+  "meta": {
+    "cohort": "바이브코딩 1기",
+    "campaignName": "왕초보도 3시간 만에 끝내는 AI 바이브코딩",
+    "trackedFrom": "2026-06-22",
+    "trackedTo": "2026-07-20",
+    "projectFrom": "2026-06-30",
+    "projectTo": "2026-07-31",
+    "source": "오픈알림신청_정리_20260720(구글 드라이브) + Meta Ads API 캠페인 일별 조회(2026-07-20 11:11)",
+    "note": "2기 비교용 고정 스냅샷. 판매·매출은 7/7~7/19 판매현황 보고서 기준이며 7/20 11:11 부분 데이터. CPM·CPC·CTR·CPA 는 저장하지 않고 화면에서 계산한다."
+  },
+  "live": [
+    {
+      "date": "2026-07-07",
+      "label": "1차 LIVE"
+    },
+    {
+      "date": "2026-07-09",
+      "label": "2차 LIVE"
+    }
+  ],
+  "goals": {
+    "targetLeads": 7300,
+    "aov": 910662,
+    "conversionRate": 0.02
+  },
+  "daily": [
+    {
+      "date": "2026-06-22",
+      "leads": 4,
+      "spend": null,
+      "impressions": null,
+      "clicks": null,
+      "sales": 0,
+      "revenue": 0,
+      "inPeriod": false
+    },
+    {
+      "date": "2026-06-23",
+      "leads": 114,
+      "spend": 176414,
+      "impressions": 5074,
+      "clicks": 251,
+      "sales": 0,
+      "revenue": 0,
+      "inPeriod": false
+    },
+    {
+      "date": "2026-06-24",
+      "leads": 362,
+      "spend": 710033,
+      "impressions": 28674,
+      "clicks": 1320,
+      "sales": 0,
+      "revenue": 0,
+      "inPeriod": false
+    },
+    {
+      "date": "2026-06-25",
+      "leads": 238,
+      "spend": 623395,
+      "impressions": 26026,
+      "clicks": 1165,
+      "sales": 0,
+      "revenue": 0,
+      "inPeriod": false
+    },
+    {
+      "date": "2026-06-26",
+      "leads": 206,
+      "spend": 634185,
+      "impressions": 24858,
+      "clicks": 1059,
+      "sales": 0,
+      "revenue": 0,
+      "inPeriod": false
+    },
+    {
+      "date": "2026-06-27",
+      "leads": 271,
+      "spend": 1035919,
+      "impressions": 42431,
+      "clicks": 1495,
+      "sales": 0,
+      "revenue": 0,
+      "inPeriod": false
+    },
+    {
+      "date": "2026-06-28",
+      "leads": 143,
+      "spend": 465325,
+      "impressions": 18076,
+      "clicks": 629,
+      "sales": 0,
+      "revenue": 0,
+      "inPeriod": false
+    },
+    {
+      "date": "2026-06-29",
+      "leads": 154,
+      "spend": 549891,
+      "impressions": 18745,
+      "clicks": 640,
+      "sales": 0,
+      "revenue": 0,
+      "inPeriod": false
+    },
+    {
+      "date": "2026-06-30",
+      "leads": 356,
+      "spend": 1514953,
+      "impressions": 53409,
+      "clicks": 1865,
+      "sales": 0,
+      "revenue": 0,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-01",
+      "leads": 635,
+      "spend": 2855114,
+      "impressions": 97504,
+      "clicks": 3484,
+      "sales": 0,
+      "revenue": 0,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-02",
+      "leads": 538,
+      "spend": 2644054,
+      "impressions": 94040,
+      "clicks": 3281,
+      "sales": 0,
+      "revenue": 0,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-03",
+      "leads": 628,
+      "spend": 2901844,
+      "impressions": 99166,
+      "clicks": 3443,
+      "sales": 0,
+      "revenue": 0,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-04",
+      "leads": 75,
+      "spend": 123138,
+      "impressions": 4254,
+      "clicks": 122,
+      "sales": 0,
+      "revenue": 0,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-05",
+      "leads": 48,
+      "spend": null,
+      "impressions": null,
+      "clicks": null,
+      "sales": 0,
+      "revenue": 0,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-06",
+      "leads": 883,
+      "spend": 4604806,
+      "impressions": 173355,
+      "clicks": 3250,
+      "sales": 0,
+      "revenue": 0,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-07",
+      "leads": 1065,
+      "spend": 8080593,
+      "impressions": 292635,
+      "clicks": 6932,
+      "sales": 213,
+      "revenue": 194360000,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-08",
+      "leads": 963,
+      "spend": 8608487,
+      "impressions": 265336,
+      "clicks": 4791,
+      "sales": 0,
+      "revenue": 0,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-09",
+      "leads": 931,
+      "spend": 6740443,
+      "impressions": 191525,
+      "clicks": 4291,
+      "sales": 150,
+      "revenue": 138450000,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-10",
+      "leads": 58,
+      "spend": 2184516,
+      "impressions": 94703,
+      "clicks": 1096,
+      "sales": 28,
+      "revenue": 23525000,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-11",
+      "leads": 36,
+      "spend": 1883124,
+      "impressions": 55026,
+      "clicks": 1135,
+      "sales": 12,
+      "revenue": 9785000,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-12",
+      "leads": 85,
+      "spend": null,
+      "impressions": null,
+      "clicks": null,
+      "sales": 56,
+      "revenue": 50755000,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-13",
+      "leads": 44,
+      "spend": 315818,
+      "impressions": 10049,
+      "clicks": 229,
+      "sales": 18,
+      "revenue": 15870000,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-14",
+      "leads": 28,
+      "spend": 263158,
+      "impressions": 7563,
+      "clicks": 227,
+      "sales": 1,
+      "revenue": 1200000,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-15",
+      "leads": 28,
+      "spend": 216430,
+      "impressions": 5986,
+      "clicks": 185,
+      "sales": 3,
+      "revenue": 3500000,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-16",
+      "leads": 14,
+      "spend": 182508,
+      "impressions": 4178,
+      "clicks": 125,
+      "sales": 3,
+      "revenue": 3500000,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-17",
+      "leads": 13,
+      "spend": 158181,
+      "impressions": 3509,
+      "clicks": 123,
+      "sales": 3,
+      "revenue": 2890000,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-18",
+      "leads": 18,
+      "spend": 219410,
+      "impressions": 6036,
+      "clicks": 190,
+      "sales": 3,
+      "revenue": 2790000,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-19",
+      "leads": 17,
+      "spend": 250241,
+      "impressions": 5354,
+      "clicks": 230,
+      "sales": 1,
+      "revenue": 490000,
+      "inPeriod": true
+    },
+    {
+      "date": "2026-07-20",
+      "leads": 5,
+      "spend": 56613,
+      "impressions": 1253,
+      "clicks": 46,
+      "sales": 0,
+      "revenue": 0,
+      "inPeriod": true
+    }
+  ],
+  "totals": {
+    "leads": 7960,
+    "spend": 47998593,
+    "impressions": 1628765,
+    "clicks": 41604,
+    "sales": 491,
+    "revenue": 447115000
+  },
+  "liveSessions": [
+    {
+      "date": "2026-07-07",
+      "label": "1차 LIVE",
+      "openChat": 6456,
+      "openAlert": 6056,
+      "viewers": 1546,
+      "viewerRate": 0.255,
+      "sales": 213,
+      "revenue": 194360000,
+      "buyRate": 0.137
+    },
+    {
+      "date": "2026-07-09",
+      "label": "2차 LIVE",
+      "openChat": 6887,
+      "openAlert": 7616,
+      "viewers": 1083,
+      "viewerRate": 0.142,
+      "sales": 150,
+      "revenue": 138450000,
+      "buyRate": 0.139
+    }
+  ],
+  "salesSplit": {
+    "live": {
+      "label": "라이브 중",
+      "sales": 363,
+      "revenue": 332810000,
+      "salesShare": 0.739,
+      "revenueShare": 0.745
+    },
+    "after": {
+      "label": "LIVE 이후",
+      "sales": 128,
+      "revenue": 114305000,
+      "salesShare": 0.261,
+      "revenueShare": 0.256
+    }
+  },
+  "products": [
+    {
+      "type": "강의 단품",
+      "price": 590000,
+      "sales": 61,
+      "share": 0.124,
+      "note": "59만 원",
+      "priceLabel": "59만원"
+    },
+    {
+      "type": "환급형",
+      "price": 990000,
+      "sales": 426,
+      "share": 0.868,
+      "note": "99·110·120만 원 (99만 415건 / 110만 0건 / 120만 11건 — 120만 건수는 총합에서 역산)",
+      "priceLabel": "99~120만원"
+    },
+    {
+      "type": "컨설팅형",
+      "price": 2900000,
+      "sales": 4,
+      "share": 0.008,
+      "note": "290만 원",
+      "priceLabel": "290만원"
+    }
+  ],
+  "reported": {
+    "note": "주간 보고서(2번째 이미지) 기재치. 집계 창·클릭 정의(링크클릭)가 일별표와 달라 그대로 보존한다. 비교 계산에는 daily 를 쓴다.",
+    "leadsTarget": 7300,
+    "leadsAchieveRate": 1.09,
+    "revenue": 447115000,
+    "sales": 491,
+    "metaSpendReported": 42270000,
+    "spendAll": 47998593,
+    "roasReported": 10.58,
+    "impressions": 1435000,
+    "linkClicks": 30256,
+    "ctr": 0.0265,
+    "cpa": 5278
+  }
+}
