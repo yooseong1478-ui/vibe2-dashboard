@@ -6,7 +6,7 @@
     "campaignIds": [
       "120253576478460198"
     ],
-    "lastUpdated": "2026-08-18T00:00:00.000Z",
+    "lastUpdated": "2026-08-19T09:07:15.461140Z",
     "note": "원본값만 저장한다. CPA·달성률·예상착지·기대수익 등 파생값은 프론트에서 계산. 대상 캠페인 = 바이브코딩 강의 2기(120253576478460198) 단일. 바이브코딩_상시용·1기는 별도 상품이라 제외."
   },
   "goals": {
@@ -71,6 +71,52 @@
       "targetCpa": 5726
     }
   ],
-  "daily": [],
-  "adsets": []
+  "daily": [
+    {
+      "date": "2026-08-18",
+      "leads": null,
+      "openTalkCum": null,
+      "spend": 1094463,
+      "impressions": 30468,
+      "clicks": 909,
+      "ctr": 2.98,
+      "cpm": 35922,
+      "frequency": 1.21,
+      "openEvents": 166
+    },
+    {
+      "date": "2026-08-19",
+      "leads": null,
+      "openTalkCum": null,
+      "spend": 2577155,
+      "impressions": 70805,
+      "clicks": 2272,
+      "ctr": 3.21,
+      "cpm": 36398,
+      "frequency": 1.2,
+      "openEvents": 350
+    }
+  ],
+  "adsets": [
+    {
+      "date": "2026-08-18",
+      "adsetId": "120253576478470198",
+      "name": "논타겟",
+      "campaignId": "120253576478460198",
+      "spend": 1094463,
+      "impressions": 30468,
+      "clicks": 909,
+      "openEvents": 166
+    },
+    {
+      "date": "2026-08-19",
+      "adsetId": "120253576478470198",
+      "name": "논타겟",
+      "campaignId": "120253576478460198",
+      "spend": 2577155,
+      "impressions": 70805,
+      "clicks": 2272,
+      "openEvents": 351
+    }
+  ]
 }
