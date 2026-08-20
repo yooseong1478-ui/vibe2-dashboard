@@ -19,6 +19,7 @@ interface Props {
   aggFrom: string | null;
   aggTo: string | null;
   capCpa: number;                 // 이 CPA 초과 시 붉게 (goals.signalFreezeMax)
+  sectionId?: string;             // 앵커 id. 다른 섹션 안에 중첩될 땐 생략(id 중복 방지)
   mainCampaignId?: string | null; // 메인/AB 구분용. 미지정이면 뱃지를 숨긴다.
 }
 
@@ -34,7 +35,7 @@ function withCalc(rows: AdsetRow[]) {
     .sort((a, b) => (b.openEvents - a.openEvents) || ((a.cpa ?? Infinity) - (b.cpa ?? Infinity)));
 }
 
-export default function AdsetSection({ latest, latestDate, agg, aggFrom, aggTo, capCpa, mainCampaignId }: Props) {
+export default function AdsetSection({ latest, latestDate, agg, aggFrom, aggTo, capCpa, mainCampaignId, sectionId }: Props) {
   const [mode, setMode] = useState<"latest" | "agg">("latest");
   // 최신일 탭: 당일 지출 0 세트 숨김 (합산 탭에는 표시)
   const rows = withCalc(mode === "latest" ? latest.filter((r) => r.spend > 0) : agg);
@@ -46,7 +47,7 @@ export default function AdsetSection({ latest, latestDate, agg, aggFrom, aggTo, 
         : "합산";
 
   return (
-    <div className="section" id="adsets">
+    <div className="section" id={sectionId}>
       <div className="eyebrow">세트별 성과 <span className="desc">{label} · 전환수 순 · CPA {capCpa.toLocaleString("ko-KR")} 초과 붉게</span></div>
       <div className="seg">
         <button className={mode === "latest" ? "on" : ""} onClick={() => setMode("latest")}>최신일 {latestDate ? `(${shortDate(latestDate)})` : ""}</button>
