@@ -8,6 +8,8 @@ export interface Goals {
   aov: number;                // 객단가 (1,000,000 — 9억 ÷ 900건)
   conversionBand: { low: number; high: number }; // 전환율 밴드 (계획 3.0% ~ 1기 실적 6.17%)
   planConversion?: number;    // 계획 기준 전환율 (0.03) — 기대수익 헤드라인
+  // 기대수익 시나리오 전환율 (2026-08-20 확정): 1차 웨비나 2.5~3.5%, 최종(2차+이후) 5.0%
+  revConv?: { w1Low: number; w1High: number; final: number };
   targetCpa?: number;         // 블렌디드 목표 CPA (5,000)
   cpaHardCap: number;         // CPA 하드캡 (5,500)
   signalGreenMax: number;     // 신호등 그린 상한 (4,500)
