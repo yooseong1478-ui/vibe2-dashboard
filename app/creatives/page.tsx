@@ -1,5 +1,6 @@
 import { getDataset } from "@/lib/dataStore";
 import { getTestingAdsCached } from "@/lib/meta";
+import { bandsForDate, todayKST } from "@/lib/metrics";
 import CreativesTabs from "@/components/CreativesTabs";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -29,8 +30,8 @@ export default async function CreativesPage() {
       <CreativesTabs
         block={data?.creatives ?? null}
         testing={testing}
-        goodCpa={data?.goals.signalYellowMax ?? 5500}
-        capCpa={data?.goals.signalFreezeMax ?? 6200}
+        goodCpa={data ? bandsForDate(data, todayKST(Date.now())).yellow : 9000}
+        capCpa={data ? bandsForDate(data, todayKST(Date.now())).freeze : 11000}
       />
       <div className="footer-links"><a href="/">← 현황판으로</a></div>
       </main>

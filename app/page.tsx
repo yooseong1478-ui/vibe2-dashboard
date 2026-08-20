@@ -1,5 +1,5 @@
 import { getDataset } from "@/lib/dataStore";
-import { computeView, computeSignalHistory, dayIndex, planForDate, todayKST, diffDays } from "@/lib/metrics";
+import { computeView, computeSignalHistory, bandsForDate, dayIndex, planForDate, todayKST, diffDays } from "@/lib/metrics";
 import { won, num, pct, money, eok, shortDate } from "@/lib/format";
 import HomeCharts from "@/components/HomeCharts";
 import { getTestingAdsCached } from "@/lib/meta";
@@ -80,12 +80,17 @@ export default async function DashboardPage() {
   }
   const cpaDaily = v.planCurve.map((p) => dailyByDate.get(p.date)?.cpaAdmin ?? null);
   const cpaRolling = v.planCurve.map((p) => rollByDate.get(p.date) ?? null);
-  const capCpa = g.signalFreezeMax ?? 6200;
-  const cpaClass = (cpa: number | null) =>
-    cpa === null ? "" : cpa <= g.signalGreenMax ? "pos" : cpa <= (g.signalYellowMax ?? 5500) ? "" : cpa <= capCpa ? "warn" : "neg";
+  // 구간별 신호등 밴드 (P1 6,500/9,000/11,000 · P2 8,500/12,000/14,000 · P3·D 9,000/13,000/18,000)
+  const zones = v.planCurve.map((p) => bandsForDate(data, p.date));
+  const capCpa = v.capToday; // 오늘 구간의 동결 상한 — 소재/세트 뱃지 기준
+  const cpaClass = (cpa: number | null, date: string) => {
+    if (cpa === null) return "";
+    const b = bandsForDate(data, date);
+    return cpa <= b.green ? "pos" : cpa <= b.yellow ? "" : cpa <= b.freeze ? "warn" : "neg";
+  };
 
   const s = v.signal;
-  const history = computeSignalHistory(v.derived, g, 7);
+  const history = computeSignalHistory(v.derived, data, 7);
 
   // 전일(최신 완결일) 실측 + 그 날짜의 플랜
   const lastC = complete.length ? complete[complete.length - 1] : null;
@@ -112,8 +117,15 @@ export default async function DashboardPage() {
   // 잔여 예산 — 알림 입력 여부와 무관하게 전체 지출 기준으로 항상 계산
   const remBudget = g.totalBudget - totalSpendAll;
 
-  // ── 기대수익 시나리오 (1차 웨비나 2.5~3.5% / 최종 5.0%) ──
-  const rc = g.revConv ?? { w1Low: 0.025, w1High: 0.035, final: 0.05 };
+  // ── 기대수익 시나리오 (1차 웨비나 2.5~3.5% / 종합 5.5~6.5%, 기준 6.0%) ──
+  const rc0 = g.revConv as any;
+  const rc = {
+    w1Low: rc0?.w1Low ?? 0.025,
+    w1High: rc0?.w1High ?? 0.035,
+    finalLow: rc0?.finalLow ?? 0.055,
+    finalHigh: rc0?.finalHigh ?? 0.065,
+    finalBase: rc0?.finalBase ?? 0.06,
+  };
   const revBase = hasLeads ? (v.leadsCum as number) : g.targetLeads; // 실측 전엔 목표 기준
   const revBaseLabel = hasLeads ? `누적 ${num(v.leadsCum)}명` : `목표 ${num(g.targetLeads)}명 기준`;
 
@@ -138,8 +150,9 @@ export default async function DashboardPage() {
     for (const ad of testing.items) {
       if (ad.impressions < 500) { learning++; continue; }
       const cpa = ad.openEvents ? ad.spend / ad.openEvents : Infinity;
-      if (cpa <= (g.signalYellowMax ?? 5500)) settled++;
-      else if (cpa > capCpa) risky++;
+      const tb = bandsForDate(data, today);
+      if (cpa <= tb.yellow) settled++;
+      else if (cpa > tb.freeze) risky++;
     }
     testLine = `🧪 테스트 ${testing.items.length}개 진행 중 (✅ 승자 ${settled} · 🌱 육성 ${learning} · 🔴 종료 ${risky})`;
   }
@@ -152,6 +165,42 @@ export default async function DashboardPage() {
   // KPI 행 카드 수 (값 없는 카드는 접고 열 수 자동 조정)
   const kpiCols = 2 + (lastC ? 1 : 0) + (v.projectedLanding !== null ? 1 : 0);
 
+  // ── 게이트 자동 판정 ──
+  // cum 게이트 기준값 = 플랜 "명목" 누적 (plan steps 에서 직접 계산).
+  // planCurve 는 실측 앵커 이후를 실측+플랜으로 재산정하므로 게이트 기준으로 쓰면
+  // 실측이 뒤처질수록 기준도 낮아지는 순환이 생긴다 — 게이트는 절대 기준이어야 한다.
+  const planCumAt = (iso: string) => {
+    let cum = 0;
+    let any = false;
+    for (const pp of data.plan) {
+      if (diffDays(pp.from, iso) < 0) break;
+      // iso 가 구간 끝을 지났으면 구간 전체, 아니면 iso 까지 부분 합산
+      const end = diffDays(pp.to, iso) >= 0 ? pp.to : iso;
+      cum += pp.perDay * (diffDays(pp.from, end) + 1);
+      any = true;
+    }
+    return any ? cum : null;
+  };
+  const gates = (g.gates ?? []).map((gt) => {
+    const due = diffDays(gt.date, today) >= 0; // 판정일 도래
+    let status: "pass" | "fail" | "wait" = "wait";
+    let current = "";
+    let target = "";
+    if (gt.type === "cpa") {
+      target = `3일 CPA ≤ ${won(gt.max ?? null)}`;
+      current = v.rolling3Cpa != null ? `현재 ${won(v.rolling3Cpa)}` : "실측 대기";
+      if (due && v.rolling3Cpa != null) status = v.rolling3Cpa <= (gt.max ?? Infinity) ? "pass" : "fail";
+    } else {
+      const base = planCumAt(gt.date);
+      const tol = gt.tolerance ?? 0;
+      const min = base != null ? Math.round(base * (1 - tol)) : null;
+      target = base != null ? `누적 ${num(base)} ±${Math.round(tol * 100)}%` : "";
+      current = v.leadsCum != null ? `현재 ${num(v.leadsCum)}` : "실측 대기";
+      if (due && v.leadsCum != null && min != null) status = v.leadsCum >= min ? "pass" : "fail";
+    }
+    return { ...gt, due, status, current, target };
+  });
+
   return (
     <>
       <header className="header">
@@ -160,8 +209,8 @@ export default async function DashboardPage() {
           <div>
             <h1>바이브코딩 2기 현황판</h1>
             <div className="sub">
-              목표 {num(g.targetLeads)}명 · LIVE {liveDates.map(shortDate).join("·")}
-              {dDay > 0 ? ` · D-${dDay}` : dDay === 0 ? " · D-DAY" : ""}
+              목표 {num(g.targetLeads)}명 · 알림 마감 {shortDate(g.webinarDate)}
+              {dDay > 0 ? ` (D-${dDay})` : dDay === 0 ? " (D-DAY)" : ""} · LIVE {liveDates.map(shortDate).join("·")}
             </div>
           </div>
         </div>
@@ -177,6 +226,7 @@ export default async function DashboardPage() {
       <SecNav
         items={[
           { id: "signal", label: "판단" },
+          { id: "gates", label: "게이트" },
           { id: "cum", label: "누적" },
           { id: "kpi", label: "KPI" },
           { id: "revenue", label: "수익" },
@@ -216,6 +266,27 @@ export default async function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* 1.5 게이트 — 의사결정 포인트 자동 판정 */}
+        {gates.length > 0 && (
+          <div className="section" id="gates">
+            <div className="eyebrow">게이트 <span className="desc">의사결정 포인트 · 기준 미달 시 조치 실행</span></div>
+            <div className="card toplist">
+              {gates.map((gt) => (
+                <div key={gt.date} className="toprow gaterow">
+                  <span className="rk">{gt.status === "pass" ? "🟢" : gt.status === "fail" ? "🔴" : "⏳"}</span>
+                  <span className="nm">
+                    <b>{shortDate(gt.date)}</b> {gt.label} · {gt.target}
+                    <span className="gsub">{gt.status === "fail" ? gt.action : gt.current}</span>
+                  </span>
+                  <span className={`chip ${gt.status === "pass" ? "pos" : gt.status === "fail" ? "neg" : "mute"}`}>
+                    {gt.status === "pass" ? "통과" : gt.status === "fail" ? "미달" : "대기"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 2. 누적 3카드 — 당일 누적 목표 대비 */}
         <div className="section" id="cum">
@@ -305,7 +376,7 @@ export default async function DashboardPage() {
             {lastC && (
               <div className="card kpi">
                 <div className="label">어제 CPA</div>
-                <div className={`value ${cpaClass(lastC.cpaAdmin)}`}>{won(lastC.cpaAdmin)}</div>
+                <div className={`value ${cpaClass(lastC.cpaAdmin, lastC.date)}`}>{won(lastC.cpaAdmin)}</div>
                 <div className="foot">
                   3일 이동 {won(v.rolling3Cpa)}
                   <span className="chip mute">{shortDate(lastC.date)}</span>
@@ -334,7 +405,7 @@ export default async function DashboardPage() {
           <div className="eyebrow">
             기대수익{" "}
             <span className="desc">
-              객단가 {money(g.aov)}원 · 1차 {pct(rc.w1Low * 100, 1)}~{pct(rc.w1High * 100, 1)} / 최종 {pct(rc.final * 100, 1)}
+              객단가 {money(g.aov)}원 · 1차 {pct(rc.w1Low * 100, 1)}~{pct(rc.w1High * 100, 1)} / 종합 {pct(rc.finalLow * 100, 1)}~{pct(rc.finalHigh * 100, 1)}
             </span>
           </div>
           <div className="grid grid-3">
@@ -345,24 +416,24 @@ export default async function DashboardPage() {
               <span className="corner">{pct(rc.w1Low * 100, 1)}~{pct(rc.w1High * 100, 1)}</span>
             </div>
             <div className="card rev">
-              <div className="rlabel">최종 (2차 + 이후)</div>
-              <div className="n">{eok(revBase * rc.final * g.aov)}</div>
-              <div className="band">{num(revBase * rc.final)}건 · {revBaseLabel}</div>
-              <span className="corner goal">{pct(rc.final * 100, 1)}</span>
+              <div className="rlabel">종합 (2차 + VOD + 강의판매)</div>
+              <div className="n">{eok(revBase * rc.finalLow * g.aov)} ~ {eok(revBase * rc.finalHigh * g.aov)}</div>
+              <div className="band">기준 {pct(rc.finalBase * 100, 1)} = {eok(revBase * rc.finalBase * g.aov)} · {revBaseLabel}</div>
+              <span className="corner goal">{pct(rc.finalLow * 100, 1)}~{pct(rc.finalHigh * 100, 1)}</span>
             </div>
             {v.projectedLanding !== null ? (
               <div className="card rev">
                 <div className="rlabel">예상 착지 기준</div>
-                <div className="n">{eok(v.projectedLanding * rc.final * g.aov)}</div>
-                <div className="band">{num(v.projectedLanding * rc.final)}건 · 착지 {num(v.projectedLanding)}명</div>
-                <span className="corner goal">{pct(rc.final * 100, 1)}</span>
+                <div className="n">{eok(v.projectedLanding * rc.finalLow * g.aov)} ~ {eok(v.projectedLanding * rc.finalHigh * g.aov)}</div>
+                <div className="band">착지 {num(v.projectedLanding)}명 × 종합 전환</div>
+                <span className="corner goal">{pct(rc.finalLow * 100, 1)}~{pct(rc.finalHigh * 100, 1)}</span>
               </div>
             ) : (
               <div className="card rev">
                 <div className="rlabel">예상 착지 기준</div>
                 <div className="n">—</div>
                 <div className="band"><span className="chip mute">⚪ 수집 중</span></div>
-                <span className="corner goal">{pct(rc.final * 100, 1)}</span>
+                <span className="corner goal">{pct(rc.finalLow * 100, 1)}~{pct(rc.finalHigh * 100, 1)}</span>
               </div>
             )}
           </div>
@@ -382,8 +453,7 @@ export default async function DashboardPage() {
             actualDaily={actualDaily}
             cpaDaily={cpaDaily}
             cpaRolling={cpaRolling}
-            zoneGreenMax={g.signalGreenMax}
-            zoneYellowMax={g.cpaHardCap}
+            zones={zones}
             planSpendDaily={planSpendDaily}
             spendDaily={v.planCurve.map((p) => dailyByDate.get(p.date)?.spend ?? null)}
             gapLeads={gapLeads}
@@ -420,7 +490,7 @@ export default async function DashboardPage() {
         {/* 8. 주차별 플랜 — 현재 주차 한 줄 + 전체 아코디언 */}
         <div className="section" id="plan">
           <div className="card oneline">
-            <span className="ol-label">{curStepNo}주차</span>
+            <span className="ol-label">{curStep.name ?? `${curStepNo}구간`}</span>
             <span className="ol-main">
               {shortDate(curStep.from)}~{shortDate(curStep.to)} · <b>{num(todayPlan?.perDay ?? curStep.perDay)}명/일</b> · 일예산{" "}
               {money(todayPlan?.dailyBudget ?? curStep.dailyBudget)} · 목표 CPA {won(todayPlan?.targetCpa ?? curStep.targetCpa)}
@@ -436,7 +506,7 @@ export default async function DashboardPage() {
                 <tbody>
                   {data.plan.map((p, i) => (
                     <tr key={p.from} className={p === curStep ? "total" : ""}>
-                      <td>{i + 1}주 {shortDate(p.from)}~{shortDate(p.to)}</td>
+                      <td>{p.name ?? `${i + 1}구간`} {shortDate(p.from)}~{shortDate(p.to)}</td>
                       <td className="mono">{p.days}일</td>
                       <td className="mono">{num(p.perDay)}</td>
                       <td className="mono">{money(p.dailyBudget)}</td>
@@ -475,7 +545,7 @@ export default async function DashboardPage() {
                     <td className="mono">{won(d.spend)}</td>
                     <td className="mono">{num(d.dailyLeads)}</td>
                     <td className="mono">{num(d.openEvents)}</td>
-                    <td className={`mono ${cpaClass(d.cpaAdmin)}`} style={{ fontWeight: 700 }}>{won(d.cpaAdmin)}</td>
+                    <td className={`mono ${cpaClass(d.cpaAdmin, d.date)}`} style={{ fontWeight: 700 }}>{won(d.cpaAdmin)}</td>
                     <td className="mono">{pct(d.ctr, 2)}</td>
                     <td className="mono">{won(d.cpm)}</td>
                     <td className="mono">{d.frequency ?? "—"}</td>

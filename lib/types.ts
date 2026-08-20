@@ -8,8 +8,10 @@ export interface Goals {
   aov: number;                // 객단가 (1,000,000 — 9억 ÷ 900건)
   conversionBand: { low: number; high: number }; // 전환율 밴드 (계획 3.0% ~ 1기 실적 6.17%)
   planConversion?: number;    // 계획 기준 전환율 (0.03) — 기대수익 헤드라인
-  // 기대수익 시나리오 전환율 (2026-08-20 확정): 1차 웨비나 2.5~3.5%, 최종(2차+이후) 5.0%
-  revConv?: { w1Low: number; w1High: number; final: number };
+  // 기대수익 시나리오 전환율 (최종 전략서 2026-08-20): 1차 웨비나 2.5~3.5%, 종합 5.5~6.5% (기준 6.0%)
+  revConv?: { w1Low: number; w1High: number; finalLow: number; finalHigh: number; finalBase: number };
+  // 게이트 (의사결정 포인트) — cum 게이트 기준값은 플랜 곡선의 해당일 누적에서 동적 계산
+  gates?: GateDef[];
   targetCpa?: number;         // 블렌디드 목표 CPA (5,000)
   cpaHardCap: number;         // CPA 하드캡 (5,500)
   signalGreenMax: number;     // 신호등 그린 상한 (4,500)
@@ -35,6 +37,19 @@ export interface PlanStep {
   perDay: number;             // 필요/일
   dailyBudget: number;        // 일 예산
   targetCpa: number;          // 목표 CPA
+  name?: string;              // 구간명 (P0 프리런 / P1 램프업 / P2 유지 / P3 스퍼트 / D-day)
+  // 구간별 신호등 밴드 — 🟢 ≤green / 🟡 ≤yellow / 🟠 동결 ≤freeze / 🔴 롤백 >freeze
+  bands?: { green: number; yellow: number; freeze: number };
+}
+
+// 게이트 정의: cpa = 러닝 3일 CPA ≤ max, cum = 플랜 누적 대비 ±tolerance
+export interface GateDef {
+  date: string;               // 판정일 (YYYY-MM-DD)
+  label: string;
+  type: "cpa" | "cum";
+  max?: number;               // cpa 게이트: 3일 이동 CPA 상한
+  tolerance?: number;         // cum 게이트: 허용 오차 (0.15 = ±15%)
+  action: string;             // 미달/초과 시 조치
 }
 
 export interface DailyRecord {

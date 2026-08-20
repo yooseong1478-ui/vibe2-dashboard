@@ -35,8 +35,8 @@ export interface HomeChartsProps {
   // B
   cpaDaily: (number | null)[];
   cpaRolling: (number | null)[];
-  zoneGreenMax: number;   // 그린존 상한 (signalGreenMax)
-  zoneYellowMax: number;  // 옐로존 상한 = 하드캡 (초과 시 레드존)
+  // 날짜별 신호등 밴드 (구간별로 다름 — 존 배경이 계단으로 바뀐다)
+  zones: { green: number; yellow: number; freeze: number }[];
   // C
   planSpendDaily: number[];
   spendDaily: (number | null)[];
@@ -108,48 +108,70 @@ export default function HomeCharts(props: HomeChartsProps) {
     [props.liveFrom, props.liveTo, green, read]
   );
 
-  // CPA 신호 존 배경 — 그린(≤greenMax) / 옐로(≤하드캡) / 레드(초과). noma5 기준선 밴드 방식.
+  // CPA 신호 존 배경 — 구간별 밴드가 달라 x 방향 계단으로 그린다.
+  // 그린(≤green) / 옐로(≤yellow) / 오렌지 동결(≤freeze) / 레드(초과).
   const cpaZones: Plugin<"line"> = useMemo(
     () => ({
       id: "cpaZones",
       beforeDatasetsDraw(chart) {
         const y = chart.scales.y as any;
-        if (!y) return;
+        const x = chart.scales.x as any;
+        if (!y || !x || !props.zones.length) return;
         const { left, right, top, bottom } = chart.chartArea;
         const ctx = chart.ctx;
         const py = (v: number) => Math.min(Math.max(y.getPixelForValue(v), top), bottom);
-        const gY = py(props.zoneGreenMax);
-        const yY = py(props.zoneYellowMax);
+        const half = (x.getPixelForValue(1) - x.getPixelForValue(0)) / 2 || 6;
         ctx.save();
-        ctx.fillStyle = read("--success", 0.07);
-        ctx.fillRect(left, gY, right - left, bottom - gY);            // 그린존
-        ctx.fillStyle = read("--warning", 0.07);
-        ctx.fillRect(left, yY, right - left, gY - yY);                // 옐로존
-        ctx.fillStyle = read("--danger", 0.06);
-        ctx.fillRect(left, top, right - left, yY - top);              // 레드존
-        // 경계선 + 라벨 (차트 영역 안 오른쪽 정렬 — noma5 와 동일)
-        for (const l of [
-          { v: props.zoneGreenMax, c: green, t: `그린 ${props.zoneGreenMax.toLocaleString()}` },
-          { v: props.zoneYellowMax, c: danger, t: `캡 ${props.zoneYellowMax.toLocaleString()}` },
-        ]) {
-          const p = py(l.v);
-          ctx.strokeStyle = l.c;
+        for (let i = 0; i < props.zones.length; i++) {
+          const z = props.zones[i];
+          const x1 = Math.max(x.getPixelForValue(i) - half, left);
+          const x2 = Math.min(x.getPixelForValue(i) + half, right);
+          const w = x2 - x1;
+          if (w <= 0) continue;
+          const gY = py(z.green);
+          const yY = py(z.yellow);
+          const fY = py(z.freeze);
+          ctx.fillStyle = read("--success", 0.08);
+          ctx.fillRect(x1, gY, w, bottom - gY);       // 그린존
+          ctx.fillStyle = read("--warning", 0.07);
+          ctx.fillRect(x1, yY, w, gY - yY);           // 옐로존
+          ctx.fillStyle = "hsl(25 90% 55% / 0.07)";
+          ctx.fillRect(x1, fY, w, yY - fY);           // 동결존
+          ctx.fillStyle = read("--danger", 0.06);
+          ctx.fillRect(x1, top, w, fY - top);         // 레드존
+        }
+        // 경계 계단선 (green / freeze)
+        for (const key of ["green", "freeze"] as const) {
+          ctx.strokeStyle = key === "green" ? green : danger;
           ctx.setLineDash([3, 3]);
           ctx.lineWidth = 1;
           ctx.beginPath();
-          ctx.moveTo(left, p);
-          ctx.lineTo(right, p);
+          for (let i = 0; i < props.zones.length; i++) {
+            const x1 = Math.max(x.getPixelForValue(i) - half, left);
+            const x2 = Math.min(x.getPixelForValue(i) + half, right);
+            const p = py(props.zones[i][key]);
+            if (i === 0) ctx.moveTo(x1, p);
+            else ctx.lineTo(x1, p);
+            ctx.lineTo(x2, p);
+          }
           ctx.stroke();
           ctx.setLineDash([]);
+        }
+        // 라벨은 마지막 구간 값 기준 (우측 정렬)
+        const lastZ = props.zones[props.zones.length - 1];
+        for (const l of [
+          { v: lastZ.green, c: green, t: `그린 ${lastZ.green.toLocaleString()}` },
+          { v: lastZ.freeze, c: danger, t: `캡 ${lastZ.freeze.toLocaleString()}` },
+        ]) {
           ctx.fillStyle = l.c;
           ctx.font = "600 9px sans-serif";
           ctx.textAlign = "right";
-          ctx.fillText(l.t, right - 2, p - 3);
+          ctx.fillText(l.t, right - 2, py(l.v) - 3);
         }
         ctx.restore();
       },
     }),
-    [props.zoneGreenMax, props.zoneYellowMax, green, danger, read]
+    [props.zones, green, danger, read]
   );
 
   const baseOptions = (tickFmt: (v: number) => string, tipFmt?: (v: number) => string): ChartOptions<any> => ({
@@ -200,8 +222,8 @@ export default function HomeCharts(props: HomeChartsProps) {
         ticks: { color: text, font: { size: 10 }, callback: (v: any) => moneyTick(Number(v)) },
         grid: { color: grid },
         beginAtZero: true,
-        // 레드존이 항상 보이도록 상한을 캡 위로 — 실측이 튀어도 존이 눌리지 않게 고정
-        suggestedMax: Math.round(props.zoneYellowMax * 1.35),
+        // 레드존이 항상 보이도록 상한을 최대 캡 위로 — 실측이 튀어도 존이 눌리지 않게 고정
+        suggestedMax: Math.round(Math.max(...props.zones.map((z) => z.freeze), 1) * 1.1),
       },
     },
   };

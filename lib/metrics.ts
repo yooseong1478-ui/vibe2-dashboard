@@ -154,13 +154,34 @@ export function deriveDaily(daily: DailyRecord[]): DailyDerived[] {
 }
 
 // ── 신호등 ────────────────────────────────────────────────────────
-// 밴드는 goals 에서 온다 (2기: 🟢 ≤4,500 / 🟡 ~5,500 / 🟠 동결 ~6,200 / 🔴 >6,200, 하드캡 5,500 · LIVE 구간 9/8~ 은 6,200)
+// 밴드는 구간별(plan step)로 다르다 — 최종 전략서(2026-08-20):
+//   P1 🟢≤6,500/🟡≤9,000/🟠≤11,000 · P2 8,500/12,000/14,000 · P3·D 9,000/13,000/18,000
 export type SignalLevel = "green" | "yellow" | "freeze" | "red" | "gray";
 
-// 해당 날짜의 하드캡 (lateCapFrom 부터 signalFreezeMax 로 완화)
-export function capForDate(goals: Dataset["goals"], iso: string): number {
-  if (goals.lateCapFrom && diffDays(goals.lateCapFrom, iso) >= 0) return goals.signalFreezeMax ?? 6200;
-  return goals.cpaHardCap;
+export interface SignalBands { green: number; yellow: number; freeze: number }
+
+// 해당 날짜가 속한 플랜 구간의 밴드. 구간 밖은 가장 가까운 구간, 그마저 없으면 goals 폴백.
+export function bandsForDate(data: Dataset, iso: string): SignalBands {
+  const { plan, goals } = data;
+  const fallback: SignalBands = {
+    green: goals.signalGreenMax,
+    yellow: goals.signalYellowMax ?? goals.cpaHardCap,
+    freeze: goals.signalFreezeMax ?? goals.cpaHardCap,
+  };
+  if (!plan.length) return fallback;
+  const hit = plan.find((p) => p.bands && diffDays(p.from, iso) >= 0 && diffDays(iso, p.to) >= 0);
+  if (hit?.bands) return hit.bands;
+  // 플랜 시작 전 → 첫 구간, 종료 후 → 마지막 구간의 밴드
+  const first = plan.find((p) => p.bands);
+  const last = [...plan].reverse().find((p) => p.bands);
+  if (diffDays(iso, plan[0].from) > 0 && first?.bands) return first.bands;
+  if (last?.bands) return last.bands;
+  return fallback;
+}
+
+// 해당 날짜의 하드캡(🟠 동결 상한 = 초과 시 롤백)
+export function capForDate(data: Dataset, iso: string): number {
+  return bandsForDate(data, iso).freeze;
 }
 export interface Signal {
   level: SignalLevel;
@@ -172,7 +193,7 @@ export interface Signal {
 
 export function computeSignal(
   derived: DailyDerived[],
-  goals: Dataset["goals"],
+  data: Dataset,
   lastUpdatedMs: number,
   nowMs: number
 ): Signal {
@@ -184,13 +205,14 @@ export function computeSignal(
   const rolling3Cpa = leadsSum ? spendSum / leadsSum : null;
 
   const stale = nowMs - lastUpdatedMs > 24 * 3600 * 1000;
-  const yMax = goals.signalYellowMax ?? 5500;
-  const fMax = goals.signalFreezeMax ?? 6200;
+  // 판정 밴드 = 최신 완결일이 속한 구간의 밴드
+  const judgeDate = complete.length ? complete[complete.length - 1].date : todayKST(nowMs);
+  const b = bandsForDate(data, judgeDate);
 
-  // 2일 연속 일 CPA 가 그 날짜 하드캡 초과 → 레드
+  // 2일 연속 일 CPA 가 그 날짜 밴드의 동결 상한 초과 → 레드
   const last2 = complete.slice(-2);
   const twoOverCap =
-    last2.length === 2 && last2.every((d) => d.cpaAdmin !== null && d.cpaAdmin > capForDate(goals, d.date));
+    last2.length === 2 && last2.every((d) => d.cpaAdmin !== null && d.cpaAdmin > capForDate(data, d.date));
 
   let level: SignalLevel;
   let label: string;
@@ -201,24 +223,24 @@ export function computeSignal(
     level = "gray";
     label = "데이터 부족";
     reason = "3일 이동 CPA를 계산할 완결 데이터가 부족합니다.";
-  } else if (rolling3Cpa > fMax || twoOverCap) {
+  } else if (rolling3Cpa > b.freeze || twoOverCap) {
     level = "red";
-    label = "증액 중단 · 롤백";
+    label = "롤백";
     reason = twoOverCap
-      ? "일 CPA가 2일 연속 하드캡을 초과했습니다."
-      : `3일 이동 CPA ${cpaStr} > ₩${fMax.toLocaleString()}.`;
-  } else if (rolling3Cpa > yMax) {
+      ? "일 CPA가 2일 연속 동결 상한을 초과했습니다."
+      : `3일 이동 CPA ${cpaStr} > ₩${b.freeze.toLocaleString()}.`;
+  } else if (rolling3Cpa > b.yellow) {
     level = "freeze";
-    label = "증액 동결";
-    reason = `3일 이동 CPA ${cpaStr} — ₩${yMax.toLocaleString()}~₩${fMax.toLocaleString()} 동결 구간.`;
-  } else if (rolling3Cpa > goals.signalGreenMax) {
+    label = "동결 · 소재 교체";
+    reason = `3일 이동 CPA ${cpaStr} — ₩${b.yellow.toLocaleString()}~₩${b.freeze.toLocaleString()} 동결 구간.`;
+  } else if (rolling3Cpa > b.green) {
     level = "yellow";
-    label = "계획대로 계단 증액";
-    reason = `3일 이동 CPA ${cpaStr} — 그린(₩${goals.signalGreenMax.toLocaleString()})~₩${yMax.toLocaleString()} 구간.`;
+    label = "유지";
+    reason = `3일 이동 CPA ${cpaStr} — 그린(₩${b.green.toLocaleString()})~₩${b.yellow.toLocaleString()} 구간.`;
   } else {
     level = "green";
-    label = "증액 가속 가능";
-    reason = `3일 이동 CPA ${cpaStr} ≤ ₩${goals.signalGreenMax.toLocaleString()}.`;
+    label = "가속";
+    reason = `3일 이동 CPA ${cpaStr} ≤ ₩${b.green.toLocaleString()}.`;
   }
 
   // 갱신 지연 시 등급은 유지하되 gray 뱃지로 덮어쓴다(판정은 reason 에 남김)
@@ -231,7 +253,7 @@ export function computeSignal(
 // ── 신호등 히스토리 (일자별 3일 이동 CPA 판정) ────────────────────
 export interface SignalDay { date: string; level: SignalLevel; cpa: number | null }
 
-export function computeSignalHistory(derived: DailyDerived[], goals: Dataset["goals"], days = 7): SignalDay[] {
+export function computeSignalHistory(derived: DailyDerived[], data: Dataset, days = 7): SignalDay[] {
   const complete = derived.filter((d) => d.dailyLeads !== null && d.spend !== null);
   const out: SignalDay[] = [];
   for (let i = 0; i < complete.length; i++) {
@@ -241,12 +263,10 @@ export function computeSignalHistory(derived: DailyDerived[], goals: Dataset["go
     const cpa = leads ? spend / leads : null;
     let level: SignalLevel = "gray";
     if (cpa !== null) {
-      const yMax = goals.signalYellowMax ?? 5500;
-      const fMax = goals.signalFreezeMax ?? 6200;
+      const b = bandsForDate(data, complete[i].date);
       const last2 = complete.slice(Math.max(0, i - 1), i + 1);
-      const twoOver = last2.length === 2 && last2.every((d) => d.cpaAdmin !== null && d.cpaAdmin > capForDate(goals, d.date));
-      level =
-        cpa > fMax || twoOver ? "red" : cpa > yMax ? "freeze" : cpa > goals.signalGreenMax ? "yellow" : "green";
+      const twoOver = last2.length === 2 && last2.every((d) => d.cpaAdmin !== null && d.cpaAdmin > capForDate(data, d.date));
+      level = cpa > b.freeze || twoOver ? "red" : cpa > b.yellow ? "freeze" : cpa > b.green ? "yellow" : "green";
     }
     out.push({ date: complete[i].date, level, cpa });
   }
@@ -327,7 +347,7 @@ export function computeView(data: Dataset, nowMs: number): DashboardView {
   const latestDataDate = withSpend.length ? withSpend[withSpend.length - 1].date : null;
 
   const lastUpdatedMs = Date.parse(data.meta.lastUpdated);
-  const signal = computeSignal(derived, goals, lastUpdatedMs, nowMs);
+  const signal = computeSignal(derived, data, lastUpdatedMs, nowMs);
 
   // asOf 기준 누적(알림 존재 최신일까지)
   const upToAsOf = asOfDate ? derived.filter((d) => diffDays(d.date, asOfDate) >= 0) : [];
@@ -358,7 +378,7 @@ export function computeView(data: Dataset, nowMs: number): DashboardView {
   const today = todayKST(nowMs);
   const todayPlan = planForDate(data, today);
   const todayRequired = todayPlan ? todayPlan.perDay : null; // 당일 planLeads
-  const capToday = capForDate(goals, today);
+  const capToday = capForDate(data, today);
   const latestActualDaily = complete.length ? complete[complete.length - 1].dailyLeads : null;
   const remainingLeads = leadsCum !== null ? Math.max(0, goals.targetLeads - leadsCum) : null;
   const remainingDays = asOfDate ? Math.max(0, diffDays(asOfDate, goals.webinarDate)) : null;

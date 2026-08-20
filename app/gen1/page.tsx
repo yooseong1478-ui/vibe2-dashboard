@@ -50,7 +50,7 @@ export default async function Gen1Page() {
           targetCpa={data.goals.targetCpa ?? Math.round(data.goals.totalBudget / data.goals.targetLeads)}
           totalBudget={data.goals.totalBudget}
           liveDates={liveDates}
-          capCpa={data.goals.signalFreezeMax ?? 6200}
+          capCpa={data.goals.signalFreezeMax ?? 11000}
         />
         <div className="footer-links"><a href="/">← 현황판으로</a></div>
       </main>

@@ -7,26 +7,25 @@
       "120253576478460198"
     ],
     "lastUpdated": "2026-08-20T01:22:30.966Z",
-    "note": "원본값만 저장한다. CPA·달성률·예상착지·기대수익 등 파생값은 프론트에서 계산. 대상 캠페인 = 바이브코딩 강의 2기(120253576478460198) 단일. 바이브코딩_상시용·1기는 별도 상품이라 제외."
+    "note": "원본값만 저장한다. 파생값은 프론트 계산. 최종 전략서(2026-08-20) 반영: 목표 30,000명(9/8 1차 몰빵)·예산 3.0억(P0 8/18~20 편입)·평균 CPA 9,800·객단가 91만·구간별 신호등 밴드. 대상 캠페인 = 바이브코딩 강의 2기(120253576478460198)."
   },
   "goals": {
     "targetLeads": 30000,
     "stretchLeads": 30000,
-    "totalBudget": 150000000,
-    "aov": 1000000,
+    "totalBudget": 300300000,
+    "aov": 910000,
     "conversionBand": {
-      "low": 0.03,
-      "high": 0.0617
+      "low": 0.025,
+      "high": 0.065
     },
     "planConversion": 0.03,
-    "cpaHardCap": 5500,
-    "signalGreenMax": 4500,
-    "signalYellowMax": 5500,
-    "signalFreezeMax": 6200,
-    "lateCapFrom": "2026-09-08",
-    "targetCpa": 5000,
+    "cpaHardCap": 11000,
+    "signalGreenMax": 6500,
+    "signalYellowMax": 9000,
+    "signalFreezeMax": 11000,
+    "targetCpa": 9800,
     "startDate": "2026-08-18",
-    "webinarDate": "2026-09-10",
+    "webinarDate": "2026-09-08",
     "liveDates": [
       "2026-09-08",
       "2026-09-10"
@@ -34,8 +33,47 @@
     "revConv": {
       "w1Low": 0.025,
       "w1High": 0.035,
-      "final": 0.05
-    }
+      "finalLow": 0.055,
+      "finalHigh": 0.065,
+      "finalBase": 0.06
+    },
+    "gates": [
+      {
+        "date": "2026-08-24",
+        "label": "러닝 3일 CPA",
+        "type": "cpa",
+        "max": 9000,
+        "action": "초과 → 소재 교체 후 8/26 재판정"
+      },
+      {
+        "date": "2026-08-25",
+        "label": "P1 누적",
+        "type": "cum",
+        "tolerance": 0.15,
+        "action": "미달 → P2 일예산 +15%"
+      },
+      {
+        "date": "2026-08-31",
+        "label": "P2 누적",
+        "type": "cum",
+        "tolerance": 0.1,
+        "action": "미달 → 3만 vs 2.6만 1차 판정"
+      },
+      {
+        "date": "2026-09-03",
+        "label": "P3 3일 CPA",
+        "type": "cpa",
+        "max": 13000,
+        "action": "초과 → 2.4~2.6만 확정 전환"
+      },
+      {
+        "date": "2026-09-07",
+        "label": "D-1 누적",
+        "type": "cum",
+        "tolerance": 0.08,
+        "action": "미달 → D-day 2,400→3,000만 증액"
+      }
+    ]
   },
   "planBase": {
     "asOf": "2026-08-17",
@@ -45,35 +83,73 @@
   "plan": [
     {
       "from": "2026-08-18",
-      "to": "2026-08-24",
-      "days": 7,
-      "perDay": 430,
-      "dailyBudget": 1541000,
-      "targetCpa": 3584
+      "to": "2026-08-20",
+      "days": 3,
+      "perDay": 250,
+      "dailyBudget": 2000000,
+      "targetCpa": 8000,
+      "name": "P0 프리런",
+      "bands": {
+        "green": 6500,
+        "yellow": 9000,
+        "freeze": 11000
+      }
     },
     {
-      "from": "2026-08-25",
+      "from": "2026-08-21",
+      "to": "2026-08-25",
+      "days": 5,
+      "perDay": 1080,
+      "dailyBudget": 8600000,
+      "targetCpa": 8000,
+      "name": "P1 램프업",
+      "bands": {
+        "green": 6500,
+        "yellow": 9000,
+        "freeze": 11000
+      }
+    },
+    {
+      "from": "2026-08-26",
       "to": "2026-08-31",
-      "days": 7,
-      "perDay": 780,
-      "dailyBudget": 3270000,
-      "targetCpa": 4192
+      "days": 6,
+      "perDay": 1020,
+      "dailyBudget": 10700000,
+      "targetCpa": 10500,
+      "name": "P2 유지",
+      "bands": {
+        "green": 8500,
+        "yellow": 12000,
+        "freeze": 14000
+      }
     },
     {
       "from": "2026-09-01",
       "to": "2026-09-07",
       "days": 7,
-      "perDay": 1370,
-      "dailyBudget": 6850000,
-      "targetCpa": 5000
+      "perDay": 2330,
+      "dailyBudget": 23300000,
+      "targetCpa": 10000,
+      "name": "P3 스퍼트",
+      "bands": {
+        "green": 9000,
+        "yellow": 13000,
+        "freeze": 18000
+      }
     },
     {
       "from": "2026-09-08",
-      "to": "2026-09-10",
-      "days": 3,
-      "perDay": 3980,
-      "dailyBudget": 22791000,
-      "targetCpa": 5726
+      "to": "2026-09-08",
+      "days": 1,
+      "perDay": 2200,
+      "dailyBudget": 24000000,
+      "targetCpa": 11000,
+      "name": "D-day",
+      "bands": {
+        "green": 9000,
+        "yellow": 13000,
+        "freeze": 18000
+      }
     }
   ],
   "daily": [
