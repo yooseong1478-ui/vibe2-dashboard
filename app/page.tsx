@@ -224,13 +224,15 @@ export default async function DashboardPage() {
             <div className="card kpi">
               <div className="label">누적 알림신청</div>
               <div className="value">
-                {hasLeads ? num(v.leadsCum) : "—"} <span className="unit">/ {num(planAnchor?.cumLeads ?? null)}</span>
+                {hasLeads ? num(v.leadsCum) : "—"} <span className="unit">/ {num(g.targetLeads)}</span>
               </div>
               <div className="foot">
                 {hasLeads ? (
                   <>
-                    달성 {pct(planAnchor?.cumLeads ? ((v.leadsCum as number) / planAnchor.cumLeads) * 100 : null, 0)}
-                    <span className={`chip ${leadsDelta >= 0 ? "pos" : "neg"}`}>{num(leadsDelta, { sign: true })}명</span>
+                    진척 {pct(v.goalProgress, 1)}
+                    <span className={`chip ${leadsDelta >= 0 ? "pos" : "neg"}`} title="당일 누적 목표 대비">
+                      계획 대비 {num(leadsDelta, { sign: true })}명
+                    </span>
                   </>
                 ) : (
                   <span className="chip mute">⚪ 수집 중</span>
