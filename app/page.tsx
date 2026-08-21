@@ -226,7 +226,7 @@ export default async function DashboardPage() {
       <SecNav
         items={[
           { id: "signal", label: "판단" },
-          { id: "gates", label: "게이트" },
+          ...(gates.length > 0 ? [{ id: "gates", label: "게이트" }] : []),
           { id: "cum", label: "누적" },
           { id: "kpi", label: "KPI" },
           { id: "revenue", label: "수익" },
@@ -492,8 +492,8 @@ export default async function DashboardPage() {
           <div className="card oneline">
             <span className="ol-label">{curStep.name ?? `${curStepNo}구간`}</span>
             <span className="ol-main">
-              {shortDate(curStep.from)}~{shortDate(curStep.to)} · <b>{num(todayPlan?.perDay ?? curStep.perDay)}명/일</b> · 일예산{" "}
-              {money(todayPlan?.dailyBudget ?? curStep.dailyBudget)} · 목표 CPA {won(todayPlan?.targetCpa ?? curStep.targetCpa)}
+              {shortDate(curStep.from)}~{shortDate(curStep.to)} · 주 목표 <b>{num(curStep.perDay * curStep.days)}명</b> · 주 예산{" "}
+              {money(curStep.dailyBudget * curStep.days)} · 목표 CPA {won(curStep.targetCpa)}
             </span>
           </div>
           <details style={{ marginTop: 8 }}>
@@ -501,28 +501,28 @@ export default async function DashboardPage() {
             <div className="card table-scroll" style={{ marginTop: 8 }}>
               <table>
                 <thead>
-                  <tr><th>구간</th><th>일수</th><th>필요/일</th><th>일예산</th><th>목표 CPA</th><th>구간 알림</th><th>구간 예산</th></tr>
+                  <tr><th>주차</th><th>일수</th><th>주 목표</th><th>주 예산</th><th>목표 CPA</th><th>필요/일</th><th>일예산</th></tr>
                 </thead>
                 <tbody>
                   {data.plan.map((p, i) => (
                     <tr key={p.from} className={p === curStep ? "total" : ""}>
                       <td>{p.name ?? `${i + 1}구간`} {shortDate(p.from)}~{shortDate(p.to)}</td>
                       <td className="mono">{p.days}일</td>
-                      <td className="mono">{num(p.perDay)}</td>
-                      <td className="mono">{money(p.dailyBudget)}</td>
-                      <td className="mono">{won(p.targetCpa)}</td>
                       <td className="mono">{num(p.perDay * p.days)}</td>
                       <td className="mono">{money(p.dailyBudget * p.days)}</td>
+                      <td className="mono">{won(p.targetCpa)}</td>
+                      <td className="mono">{num(p.perDay)}</td>
+                      <td className="mono">{money(p.dailyBudget)}</td>
                     </tr>
                   ))}
                   <tr className="total">
                     <td>합계</td>
                     <td className="mono">{data.plan.reduce((a, p) => a + p.days, 0)}일</td>
-                    <td className="mono">—</td>
-                    <td className="mono">—</td>
-                    <td className="mono">{won(g.targetCpa ?? null)}</td>
                     <td className="mono">{num(data.plan.reduce((a, p) => a + p.perDay * p.days, 0))}</td>
                     <td className="mono">{money(data.plan.reduce((a, p) => a + p.dailyBudget * p.days, 0))}</td>
+                    <td className="mono">{won(g.targetCpa ?? null)}</td>
+                    <td className="mono">—</td>
+                    <td className="mono">—</td>
                   </tr>
                 </tbody>
               </table>
