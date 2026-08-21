@@ -309,7 +309,7 @@ export default function HomeCharts(props: HomeChartsProps) {
       <div className="card cchart">
         <div className="section-title">
           페이스 갭 — 누적 실측 − 누적 목표
-          <span className="tip" data-tip="0선 위면 목표보다 앞서감, 아래면 뒤처짐. 누적 알림/누적 지출 차트를 편차 하나로 요약." role="img" aria-label="설명">ⓘ</span>
+          <span className="tip" data-tip="0선 위면 목표보다 앞서감, 아래면 뒤처짐. 집행률(누적지출÷계획지출)이 ±10% 이탈하면 착지도 잔여예산 실제값으로 매일 재계산된다." role="img" aria-label="설명">ⓘ</span>
         </div>
         <div className="seg" style={{ margin: "8px 0 4px" }}>
           <button className={gapMode === "leads" ? "on" : ""} onClick={() => setGapMode("leads")}>알림 기준</button>

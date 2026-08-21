@@ -7,6 +7,7 @@ import AdsetSection, { type AdsetRow } from "@/components/AdsetSection";
 import CreativeSection from "@/components/CreativeSection";
 import ThemeToggle from "@/components/ThemeToggle";
 import SecNav from "@/components/SecNav";
+import { computeLanding } from "@/lib/landing";
 
 const DOT: Record<string, string> = { green: "🟢", yellow: "🟡", freeze: "🟠", red: "🔴", gray: "⚪" };
 
@@ -92,6 +93,19 @@ export default async function DashboardPage() {
   const s = v.signal;
   const history = computeSignalHistory(v.derived, data, 7);
 
+  // ── 착지 3시나리오 (낙관/기준/보수) + 착지 밴드 vs 목표 판정 ──
+  const landing = computeLanding(data, v.derived, now);
+  const LDOT: Record<string, string> = { green: "🟢", yellow: "🟡", red: "🔴", gray: "⚪" };
+  const LMSG: Record<string, string> = {
+    green: "안전 — 보수 시나리오도 목표 이상",
+    yellow: "유지 · CPA 감시 — 기준은 목표 이상, 보수는 미달",
+    red: "증액 or 소재 교체 트리거 — 기준 시나리오가 목표 미달",
+    gray: "실측 대기",
+  };
+  // 판단 카드 배경은 CPA 신호와 착지 신호 중 나쁜 쪽
+  const RANK: Record<string, number> = { green: 0, yellow: 1, freeze: 2, red: 3, gray: 0 };
+  const cardLevel = RANK[landing.signal] > RANK[s.level] ? landing.signal : s.level;
+
   // 전일(최신 완결일) 실측 + 그 날짜의 플랜
   const lastC = complete.length ? complete[complete.length - 1] : null;
   const lastPlan = lastC ? planForDate(data, lastC.date) : null;
@@ -120,11 +134,12 @@ export default async function DashboardPage() {
   // ── 기대수익 시나리오 (1차 웨비나 2.5~3.5% / 종합 5.5~6.5%, 기준 6.0%) ──
   const rc0 = g.revConv as any;
   const rc = {
-    w1Low: rc0?.w1Low ?? 0.025,
-    w1High: rc0?.w1High ?? 0.035,
-    finalLow: rc0?.finalLow ?? 0.055,
-    finalHigh: rc0?.finalHigh ?? 0.065,
-    finalBase: rc0?.finalBase ?? 0.06,
+    w1Low: rc0?.w1Low ?? 0.02,
+    w1High: rc0?.w1High ?? 0.03,
+    w1Base: rc0?.w1Base ?? 0.025,
+    finalLow: rc0?.finalLow ?? 0.045,
+    finalHigh: rc0?.finalHigh ?? 0.06,
+    finalBase: rc0?.finalBase ?? 0.05,
   };
   const revBase = hasLeads ? (v.leadsCum as number) : g.targetLeads; // 실측 전엔 목표 기준
   const revBaseLabel = hasLeads ? `누적 ${num(v.leadsCum)}명` : `목표 ${num(g.targetLeads)}명 기준`;
@@ -163,7 +178,7 @@ export default async function DashboardPage() {
   const todayPlan = planForDate(data, today);
 
   // KPI 행 카드 수 (값 없는 카드는 접고 열 수 자동 조정)
-  const kpiCols = 2 + (lastC ? 1 : 0) + (v.projectedLanding !== null ? 1 : 0);
+  const kpiCols = 2 + (lastC ? 1 : 0) + (landing.base !== null ? 1 : 0);
 
   // ── 게이트 자동 판정 ──
   // cum 게이트 기준값 = 플랜 "명목" 누적 (plan steps 에서 직접 계산).
@@ -239,10 +254,10 @@ export default async function DashboardPage() {
       />
 
       <main className="wrap">
-        {/* 1. 오늘의 판단 — 신호등 + 7일 히스토리 */}
+        {/* 1. 오늘의 판단 — CPA + 착지밴드 이중 판정 */}
         <div className="section" id="signal">
-          <div className={`signal ${s.level}`}>
-            <div className="dot">{DOT[s.level]}</div>
+          <div className={`signal ${cardLevel}`}>
+            <div className="dot">{DOT[cardLevel]}</div>
             <div className="body">
               <div className="t">
                 {s.rolling3Cpa === null ? "데이터 수집 중" : s.label}
@@ -251,8 +266,14 @@ export default async function DashboardPage() {
               <div className="r">
                 {s.rolling3Cpa === null
                   ? `${shortDate(g.startDate)} 집행 시작 · 알림신청 입력 대기`
-                  : `3일 이동 CPA ${won(s.rolling3Cpa)} · 하드캡 ${won(v.capToday)}`}
+                  : `CPA ${DOT[s.level]} 3일 이동 ${won(s.rolling3Cpa)} (캡 ${won(v.capToday)})`}
               </div>
+              {landing.signal !== "gray" && (
+                <div className="r">
+                  착지 {LDOT[landing.signal]} 보수 {num(landing.conservative)} ~ 낙관 {num(landing.optimistic)} (기준{" "}
+                  {num(landing.base)}) vs 목표 {num(g.targetLeads)} — {LMSG[landing.signal]}
+                </div>
+              )}
               {history.length > 0 && (
                 <div className="sighist">
                   {history.map((h) => (
@@ -384,15 +405,16 @@ export default async function DashboardPage() {
               </div>
             )}
 
-            {v.projectedLanding !== null && (
+            {landing.base !== null && (
               <div className="card kpi">
                 <div className="label">
-                  예상 착지 <Tip text="잔여 예산 ÷ 최근 3일 CPA + 현재 누적" />
+                  예상 착지 <Tip text={`낙관 = 잔여예산 ÷ 3일CPA(${won(landing.cpa3)}) · 기준 = 잔여×0.95 ÷ 7일CPA(${won(landing.cpa7)})×k${landing.k.toFixed(2)} (스케일업 ${landing.scaleRatio ? "×" + landing.scaleRatio.toFixed(1) : "—"}) · 보수 = 잔여×0.90 ÷ 잔여플랜 CPA(${won(landing.planCpaRemaining)}). "계획 대비 %" 선형 외삽은 쓰지 않는다.`} />
                 </div>
-                <div className="value">{num(v.projectedLanding)}<span className="unit">명</span></div>
+                <div className="value">{num(landing.base)}<span className="unit">명</span></div>
                 <div className="foot">
-                  <span className={`chip ${v.projectedLanding >= g.targetLeads ? "pos" : "neg"}`}>
-                    목표 대비 {pct((v.projectedLanding / g.targetLeads) * 100, 0)}
+                  {num(landing.conservative)} ~ {num(landing.optimistic)}
+                  <span className={`chip ${landing.signal === "green" ? "pos" : landing.signal === "red" ? "neg" : "warn"}`}>
+                    {LDOT[landing.signal]} 목표 대비 {pct(((landing.base ?? 0) / g.targetLeads) * 100, 0)}
                   </span>
                 </div>
               </div>
@@ -405,7 +427,7 @@ export default async function DashboardPage() {
           <div className="eyebrow">
             기대수익{" "}
             <span className="desc">
-              객단가 {money(g.aov)}원 · 1차 {pct(rc.w1Low * 100, 1)}~{pct(rc.w1High * 100, 1)} / 종합 {pct(rc.finalLow * 100, 1)}~{pct(rc.finalHigh * 100, 1)}
+              객단가 {money(g.aov)}원 · 1차 {pct(rc.w1Low * 100, 1)}~{pct(rc.w1High * 100, 1)} (기준 {pct(rc.w1Base * 100, 1)}) / 종합 {pct(rc.finalLow * 100, 1)}~{pct(rc.finalHigh * 100, 1)} (기준 {pct(rc.finalBase * 100, 1)})
             </span>
           </div>
           <div className="grid grid-3">
@@ -421,19 +443,22 @@ export default async function DashboardPage() {
               <div className="band">기준 {pct(rc.finalBase * 100, 1)} = {eok(revBase * rc.finalBase * g.aov)} · {revBaseLabel}</div>
               <span className="corner goal">{pct(rc.finalLow * 100, 1)}~{pct(rc.finalHigh * 100, 1)}</span>
             </div>
-            {v.projectedLanding !== null ? (
+            {landing.base !== null ? (
               <div className="card rev">
-                <div className="rlabel">예상 착지 기준</div>
-                <div className="n">{eok(v.projectedLanding * rc.finalLow * g.aov)} ~ {eok(v.projectedLanding * rc.finalHigh * g.aov)}</div>
-                <div className="band">착지 {num(v.projectedLanding)}명 × 종합 전환</div>
-                <span className="corner goal">{pct(rc.finalLow * 100, 1)}~{pct(rc.finalHigh * 100, 1)}</span>
+                <div className="rlabel">
+                  착지 시나리오 <Tip text="최저선 = 보수 착지 × 종합 하한 4.5% — 이중 낙관(낙관 착지 × 낙관 전환) 방지용 대표 하단. 상단 = 낙관 착지 × 상한 6.0%." />
+                </div>
+                <div className="revrows">
+                  <div><span>최저선</span><b>{eok((landing.conservative ?? 0) * rc.finalLow * g.aov)}</b><i>보수 {num(landing.conservative)} × {pct(rc.finalLow * 100, 1)}</i></div>
+                  <div><span>기준</span><b>{eok((landing.base ?? 0) * rc.finalBase * g.aov)}</b><i>기준 {num(landing.base)} × {pct(rc.finalBase * 100, 1)}</i></div>
+                  <div><span>상단</span><b>{eok((landing.optimistic ?? 0) * rc.finalHigh * g.aov)}</b><i>낙관 {num(landing.optimistic)} × {pct(rc.finalHigh * 100, 1)}</i></div>
+                </div>
               </div>
             ) : (
               <div className="card rev">
-                <div className="rlabel">예상 착지 기준</div>
+                <div className="rlabel">착지 시나리오</div>
                 <div className="n">—</div>
                 <div className="band"><span className="chip mute">⚪ 수집 중</span></div>
-                <span className="corner goal">{pct(rc.finalLow * 100, 1)}~{pct(rc.finalHigh * 100, 1)}</span>
               </div>
             )}
           </div>

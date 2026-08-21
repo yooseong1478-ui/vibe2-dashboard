@@ -8,8 +8,11 @@ export interface Goals {
   aov: number;                // 객단가 (1,000,000 — 9억 ÷ 900건)
   conversionBand: { low: number; high: number }; // 전환율 밴드 (계획 3.0% ~ 1기 실적 6.17%)
   planConversion?: number;    // 계획 기준 전환율 (0.03) — 기대수익 헤드라인
-  // 기대수익 시나리오 전환율 (최종 전략서 2026-08-20): 1차 웨비나 2.5~3.5%, 종합 5.5~6.5% (기준 6.0%)
-  revConv?: { w1Low: number; w1High: number; finalLow: number; finalHigh: number; finalBase: number };
+  // 기대수익 시나리오 전환율 (2026-08-21 보수화, 노마5기 1차 실측 2.19% 근거):
+  // 1차 웨비나 2.0~3.0% (기준 2.5), 종합 4.5~6.0% (기준 5.0)
+  revConv?: { w1Low: number; w1High: number; w1Base?: number; finalLow: number; finalHigh: number; finalBase: number };
+  // 착지 3시나리오 파라미터 — kLookup: [예산배수 상한, 스케일업 계수 k] 룩업 테이블
+  landing?: { kLookup: [number, number][]; baseHaircut: number; conservativeHaircut: number };
   // 게이트 (의사결정 포인트) — cum 게이트 기준값은 플랜 곡선의 해당일 누적에서 동적 계산
   gates?: GateDef[];
   targetCpa?: number;         // 블렌디드 목표 CPA (5,000)
