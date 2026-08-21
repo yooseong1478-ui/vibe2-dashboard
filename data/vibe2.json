@@ -6,13 +6,13 @@
     "campaignIds": [
       "120253576478460198"
     ],
-    "lastUpdated": "2026-08-21T02:43:25.054Z",
+    "lastUpdated": "2026-08-21T02:43:42.016Z",
     "note": "원본값만 저장한다. 파생값은 프론트 계산. 노마5기 실측 % 기반 재배분(2026-08-21): 마감 2일(9/7~8)에 잔여예산 21% 몰빵, 착지 3시나리오(스케일업 계수 k), 전환율 1차 2.0~3.0/종합 4.5~6.0. 대상 캠페인 = 바이브코딩 강의 2기(120253576478460198)."
   },
   "goals": {
     "targetLeads": 30000,
     "stretchLeads": 30000,
-    "totalBudget": 302369602,
+    "totalBudget": 300369602,
     "aov": 910000,
     "conversionBand": {
       "low": 0.02,
@@ -23,7 +23,7 @@
     "signalGreenMax": 6500,
     "signalYellowMax": 9000,
     "signalFreezeMax": 11000,
-    "targetCpa": 8683,
+    "targetCpa": 8626,
     "startDate": "2026-08-18",
     "webinarDate": "2026-09-08",
     "liveDates": [
@@ -133,7 +133,7 @@
       "to": "2026-09-08",
       "days": 2,
       "perDay": 3750,
-      "dailyBudget": 31000000,
+      "dailyBudget": 30000000,
       "targetCpa": 8000,
       "name": "마감 스퍼트 🔥",
       "bands": {
