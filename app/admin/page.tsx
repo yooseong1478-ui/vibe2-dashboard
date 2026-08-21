@@ -3,6 +3,7 @@ import { getDataset } from "@/lib/dataStore";
 import { deriveDaily } from "@/lib/metrics";
 import AdminLogin from "@/components/AdminLogin";
 import IngestForm, { type EditRow } from "@/components/IngestForm";
+import PlanEditor from "@/components/PlanEditor";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +37,7 @@ export default async function AdminPage() {
     <main className="admin-wrap">
       <div className="header"><h1>현황판 입력</h1></div>
       <IngestForm prevCum={last?.leadsCum ?? null} prevDate={last?.date ?? null} rows={rows} />
+      {data && <PlanEditor plan={data.plan} targetLeads={data.goals.targetLeads} />}
       <div className="footer-links"><a href="/">← 대시보드</a></div>
     </main>
   );

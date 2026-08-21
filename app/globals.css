@@ -1336,3 +1336,44 @@ details > summary:hover { color: hsl(var(--fg)); }
 .revrows > div:first-child span { color: hsl(var(--danger)); }
 .revrows b { font-size: 16px; font-weight: 750; letter-spacing: -.02em; }
 .revrows i { font-style: normal; font-size: 11px; color: hsl(var(--text-3)); }
+
+/* ── 플랜 편집기 (/admin) ─────────────────────────────────────── */
+.planedit { margin-top: 28px; }
+.planedit > summary {
+  font-size: 14px; font-weight: 700; color: hsl(var(--fg));
+  padding: 12px 0;
+}
+.pe-hint { font-size: 12px; color: hsl(var(--text-3)); margin: 4px 0 14px; line-height: 1.5; }
+.pe-row {
+  border: 1px solid hsl(var(--border)); border-radius: var(--radius-sm);
+  background: hsl(var(--surface)); padding: 12px; margin-bottom: 10px;
+}
+.pe-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.pe-name {
+  flex: 1; font-size: 13px; font-weight: 650; padding: 6px 10px;
+  border: 1px solid hsl(var(--border)); border-radius: var(--radius-xs);
+  background: hsl(var(--surface-2)); color: hsl(var(--fg));
+}
+.pe-days { font-size: 11.5px; color: hsl(var(--text-3)); flex: none; }
+.pe-del {
+  flex: none; width: 26px; height: 26px; border-radius: 8px; border: 1px solid hsl(var(--border));
+  background: hsl(var(--surface-2)); color: hsl(var(--danger)); cursor: pointer; font-size: 12px;
+}
+.pe-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.pe-grid label { font-size: 11px; font-weight: 600; color: hsl(var(--text-3)); display: flex; flex-direction: column; gap: 3px; }
+.pe-grid input {
+  width: 100%; padding: 7px 9px; font-size: 13px;
+  border: 1px solid hsl(var(--border)); border-radius: var(--radius-xs);
+  background: hsl(var(--surface-2)); color: hsl(var(--fg));
+  font-feature-settings: "tnum" 1;
+}
+.pe-grid input:focus { outline: none; border-color: hsl(var(--primary)); }
+.pe-add {
+  width: 100%; padding: 9px; border-radius: var(--radius-xs);
+  border: 1px dashed hsl(var(--border-strong)); background: transparent;
+  color: hsl(var(--text-2)); font-size: 13px; font-weight: 600; cursor: pointer; margin: 4px 0 12px;
+}
+.pe-add:hover { background: hsl(var(--surface-2)); }
+.pe-total { font-size: 13px; color: hsl(var(--text-2)); margin-bottom: 12px; }
+.pe-save { width: 100%; justify-content: center; }
+.planedit .banner { margin-top: 10px; }
