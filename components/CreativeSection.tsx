@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { CreativesBlock, CreativeItem, CreativeMetrics } from "@/lib/types";
 import { won, num, pct, shortDate } from "@/lib/format";
 
@@ -43,6 +43,27 @@ export default function CreativeSection({ block, compact = false, capCpa }: { bl
   const [period, setPeriod] = useState<Period>("cumulative");
   const [zoom, setZoom] = useState<CreativeItem | null>(null);
   const [showAll, setShowAll] = useState(false);
+
+  // 광고 미리보기 iframe — 계정 토큰이 video 노드 권한이 없어(#10) mp4 직재생이 불가하므로
+  // /api/preview 가 /{ad_id}/previews 로 받아온 공식 미리보기를 임베드한다 (영상 재생 포함).
+  const [preview, setPreview] = useState<{ adId: string; html: string } | null>(null);
+  const [previewState, setPreviewState] = useState<"idle" | "loading" | "error">("idle");
+  useEffect(() => {
+    if (!zoom?.adId) { setPreview(null); setPreviewState("idle"); return; }
+    const adId = zoom.adId;
+    let alive = true;
+    setPreview(null);
+    setPreviewState("loading");
+    fetch(`/api/preview?adId=${adId}`)
+      .then((r) => r.json())
+      .then((j) => {
+        if (!alive) return;
+        if (j.ok && j.body) { setPreview({ adId, html: j.body }); setPreviewState("idle"); }
+        else setPreviewState("error");
+      })
+      .catch(() => alive && setPreviewState("error"));
+    return () => { alive = false; };
+  }, [zoom?.adId]);
 
   const rows = useMemo(() => {
     const pick = (it: CreativeItem) => (period === "cumulative" ? it.cumulative : it.latest);
@@ -139,24 +160,26 @@ export default function CreativeSection({ block, compact = false, capCpa }: { bl
         <div className="lightbox" onClick={() => setZoom(null)}>
           <div className="lbinner" onClick={(e) => e.stopPropagation()}>
             <button className="lbclose" onClick={() => setZoom(null)}>✕</button>
-            <div className="lbimg">
-              {zoom.objectType === "VIDEO" && zoom.videoSrc ? (
-                // 원본 mp4 확보 시 대시보드 안에서 바로 재생
+            <div className={`lbimg ${preview ? "haspreview" : ""}`}>
+              {preview ? (
+                <div className="lbpreview" dangerouslySetInnerHTML={{ __html: preview.html }} />
+              ) : zoom.objectType === "VIDEO" && zoom.videoSrc ? (
                 <video src={zoom.videoSrc} controls autoPlay playsInline poster={zoom.thumb ?? undefined} />
               ) : zoom.thumb ? (
                 <img src={zoom.thumb} alt={zoom.name} />
               ) : (
                 <div className="cthumb ph"><span>{zoom.objectType === "VIDEO" ? "🎬" : "🖼"}</span></div>
               )}
+              {previewState === "loading" && <div className="lbloading">미리보기 불러오는 중…</div>}
             </div>
             <div className="lbname">{zoom.name}</div>
             <div className="lbtype">
               {zoom.objectType === "VIDEO" ? (zoom.videoSrc ? "🎬 영상 소재" : "🎬 영상 소재") : "🖼 이미지 소재"} · {isOn(zoom.status) ? "ON" : "OFF"}
             </div>
-            {zoom.objectType === "VIDEO" && !zoom.videoSrc && zoom.videoUrl && (
-              <a className="lbplay" href={zoom.videoUrl} target="_blank" rel="noopener noreferrer">
-                ▶ Facebook에서 영상 재생 <span className="lbnote">(광고 계정 로그인 필요)</span>
-              </a>
+            {previewState === "error" && zoom.objectType === "VIDEO" && (
+              <div className="lbplay" style={{ cursor: "default" }}>
+                미리보기를 불러오지 못했습니다 <span className="lbnote">(썸네일만 표시)</span>
+              </div>
             )}
             {(() => {
               const m = period === "cumulative" ? zoom.cumulative : zoom.latest;

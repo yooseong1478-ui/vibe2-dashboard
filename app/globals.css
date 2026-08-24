@@ -1377,3 +1377,23 @@ details > summary:hover { color: hsl(var(--fg)); }
 .pe-total { font-size: 13px; color: hsl(var(--text-2)); margin-bottom: 12px; }
 .pe-save { width: 100%; justify-content: center; }
 .planedit .banner { margin-top: 10px; }
+
+/* ── 소재 라이트박스: 광고 미리보기 iframe ────────────────────── */
+.lbimg.haspreview { background: transparent; }
+.lbpreview { display: flex; justify-content: center; width: 100%; }
+.lbpreview iframe {
+  border: 0;
+  border-radius: var(--radius-sm);
+  max-width: 100%;
+  /* 메타 미리보기 iframe 은 자체 width/height 속성을 갖고 온다 — 세로만 뷰포트에 맞춘다 */
+  max-height: 74vh;
+  background: #fff;
+}
+.lbloading {
+  position: absolute;
+  inset: auto 0 10px 0;
+  text-align: center;
+  font-size: 12px;
+  color: hsl(var(--text-3));
+}
+.lbimg { position: relative; }
