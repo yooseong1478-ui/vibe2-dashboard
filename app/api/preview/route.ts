@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { getDataset } from "@/lib/dataStore";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,12 +17,8 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: false, error: "adId 형식 오류" }, { status: 400 });
   }
 
-  const { data } = await getDataset();
-  const known = data?.creatives?.items.some((it) => it.adId === adId);
-  if (!known) {
-    return NextResponse.json({ ok: false, error: "알 수 없는 광고" }, { status: 404 });
-  }
-
+  // 데이터셋 존재 검증은 하지 않는다 — 테스트 중 소재(등록 3일 내)는 creatives 블록에
+  // 아직 없다. 토큰이 접근 가능한 광고(이 계정)만 메타가 응답하므로 프록시 남용 위험은 없다.
   const hit = cache.get(adId);
   if (hit && Date.now() - hit.ts < TTL) {
     return NextResponse.json({ ok: true, body: hit.body, cached: true });

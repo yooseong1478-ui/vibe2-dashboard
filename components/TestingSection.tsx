@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import AdPreviewModal from "./AdPreviewModal";
 import type { TestingAdsResult, TestingAd } from "@/lib/meta";
 import { won, num, pct, shortDate } from "@/lib/format";
 
@@ -13,6 +14,7 @@ function judge(ad: TestingAd, goodCpa: number, capCpa: number): { badge: string;
 }
 
 export default function TestingSection({ result, goodCpa, capCpa }: { result: TestingAdsResult; goodCpa: number; capCpa: number }) {
+  const [zoom, setZoom] = useState<TestingAd | null>(null);
   // 기본은 판정 가능한 소재만(안착/관찰/위험). 🌱 학습중은 토글 뒤로.
   const [showLearning, setShowLearning] = useState(false);
   const items = result.items;
@@ -61,7 +63,7 @@ export default function TestingSection({ result, goodCpa, capCpa }: { result: Te
             {rows.map(({ ad, j }) => {
               const cpa = ad.openEvents ? ad.spend / ad.openEvents : null;
               return (
-                <div key={ad.adId} className="ccard" style={{ cursor: "default" }}>
+                <button key={ad.adId} className="ccard" onClick={() => setZoom(ad)}>
                   <div className={`cthumb ${ad.isVideo ? "video" : ""} ${!ad.thumb ? "ph" : ""}`}>
                     {ad.thumb ? <img src={ad.thumb} alt={ad.name} loading="lazy" /> : <span>{ad.isVideo ? "🎬" : "🖼"}</span>}
                     {ad.isVideo && ad.thumb && <span className="play">▶</span>}
@@ -84,12 +86,23 @@ export default function TestingSection({ result, goodCpa, capCpa }: { result: Te
                       <span className="hint" style={{ marginLeft: 6 }}>노출 {num(ad.impressions)} · CTR {pct(ad.ctr, 2)}</span>
                     </div>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
         </div>
       ))}
+      {zoom && (
+        <AdPreviewModal
+          adId={zoom.adId}
+          name={zoom.name}
+          thumb={zoom.thumb}
+          isVideo={zoom.isVideo}
+          on={zoom.on}
+          stats={{ spend: zoom.spend, impressions: zoom.impressions, clicks: zoom.clicks, ctr: zoom.ctr, openEvents: zoom.openEvents }}
+          onClose={() => setZoom(null)}
+        />
+      )}
     </div>
   );
 }
