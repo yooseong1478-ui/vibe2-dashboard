@@ -8,8 +8,8 @@
       "120253615420350198",
       "120253690992100198"
     ],
-    "lastUpdated": "2026-08-24T23:50:57.660553Z",
-    "note": "원본값만 저장. 파생값은 프론트 계산. 대상 캠페인 3개 합산: 메인(120253576478460198, 8/18~) + 서브(120253615420350198, 8/20~22 소액) + 사본(120253690992100198, 8/24~). 2026-08-25 재수집."
+    "lastUpdated": "2026-08-25T03:01:30.444778Z",
+    "note": "원본값만 저장. 파생값은 프론트 계산. 2026-08-25 일별 목표 변경: 8/26~9/8 램프업/본집행/고점/마감 4구간, 한계 CPA 기준 운영. 미래 목표는 lib/replan.ts 동적 재계산 — 과거는 daily[].planSnapshot 동결. 대상 캠페인 3개(메인+서브+사본)."
   },
   "goals": {
     "targetLeads": 30000,
@@ -40,7 +40,40 @@
       "finalHigh": 0.06,
       "finalBase": 0.05
     },
-    "gates": [],
+    "gates": [
+      {
+        "date": "2026-08-28",
+        "label": "누적",
+        "type": "cum",
+        "target": 10035,
+        "tolerance": 0.1,
+        "action": "미달 → 일 예산 소화 여부 점검, 세트 추가"
+      },
+      {
+        "date": "2026-08-31",
+        "label": "누적",
+        "type": "cum",
+        "target": 15435,
+        "tolerance": 0.1,
+        "action": "미달 → 목표 2.6만 하향 1차 판정"
+      },
+      {
+        "date": "2026-09-03",
+        "label": "누적",
+        "type": "cum",
+        "target": 20985,
+        "tolerance": 0.08,
+        "action": "미달 → 목표 2.4~2.6만 확정 전환"
+      },
+      {
+        "date": "2026-09-06",
+        "label": "누적",
+        "type": "cum",
+        "target": 26835,
+        "tolerance": 0.05,
+        "action": "미달 → 예비비 688만 마감 2일 투입"
+      }
+    ],
     "landing": {
       "kLookup": [
         [
@@ -66,6 +99,12 @@
       ],
       "baseHaircut": 0.95,
       "conservativeHaircut": 0.9
+    },
+    "replan": {
+      "dailySpendCap": 20000000,
+      "rampCapRatio": 1.5,
+      "minAllowedCpa": 8000,
+      "maxDailyLeads": 2200
     }
   },
   "planBase": {
@@ -104,8 +143,8 @@
     },
     {
       "from": "2026-08-25",
-      "to": "2026-08-31",
-      "days": 7,
+      "to": "2026-08-25",
+      "days": 1,
       "perDay": 1486,
       "dailyBudget": 13428571,
       "targetCpa": 9000,
@@ -117,31 +156,59 @@
       }
     },
     {
-      "from": "2026-09-01",
-      "to": "2026-09-06",
-      "days": 6,
-      "perDay": 1700,
-      "dailyBudget": 16166667,
+      "from": "2026-08-26",
+      "to": "2026-08-27",
+      "days": 2,
+      "perDay": 1400,
+      "dailyBudget": 13300000,
       "targetCpa": 9500,
-      "name": "3주차 전반",
+      "name": "램프업",
       "bands": {
-        "green": 9000,
-        "yellow": 13000,
-        "freeze": 18000
+        "green": 8100,
+        "yellow": 11900,
+        "freeze": 13800
+      }
+    },
+    {
+      "from": "2026-08-28",
+      "to": "2026-09-02",
+      "days": 6,
+      "perDay": 1800,
+      "dailyBudget": 18000000,
+      "targetCpa": 10000,
+      "name": "본집행",
+      "bands": {
+        "green": 8500,
+        "yellow": 12500,
+        "freeze": 14500
+      }
+    },
+    {
+      "from": "2026-09-03",
+      "to": "2026-09-06",
+      "days": 4,
+      "perDay": 1950,
+      "dailyBudget": 20500000,
+      "targetCpa": 10500,
+      "name": "고점",
+      "bands": {
+        "green": 8900,
+        "yellow": 13100,
+        "freeze": 15200
       }
     },
     {
       "from": "2026-09-07",
       "to": "2026-09-08",
       "days": 2,
-      "perDay": 3750,
-      "dailyBudget": 30000000,
-      "targetCpa": 8000,
-      "name": "마감 스퍼트 🔥",
+      "perDay": 1600,
+      "dailyBudget": 15200000,
+      "targetCpa": 9500,
+      "name": "마감",
       "bands": {
-        "green": 9000,
-        "yellow": 13000,
-        "freeze": 18000
+        "green": 8100,
+        "yellow": 11900,
+        "freeze": 13800
       }
     }
   ],
@@ -156,7 +223,12 @@
       "ctr": 2.98,
       "cpm": 35929,
       "frequency": 1.21,
-      "openEvents": 166
+      "openEvents": 166,
+      "planSnapshot": {
+        "targetLeads": 555,
+        "targetSpend": 3842401,
+        "targetCPA": 6923
+      }
     },
     {
       "date": "2026-08-19",
@@ -168,7 +240,12 @@
       "ctr": 3.4,
       "cpm": 35112,
       "frequency": 1.23,
-      "openEvents": 613
+      "openEvents": 613,
+      "planSnapshot": {
+        "targetLeads": 555,
+        "targetSpend": 3842401,
+        "targetCPA": 6923
+      }
     },
     {
       "date": "2026-08-20",
@@ -180,7 +257,12 @@
       "ctr": 2.94,
       "cpm": 28286,
       "frequency": 1.21,
-      "openEvents": 1043
+      "openEvents": 1043,
+      "planSnapshot": {
+        "targetLeads": 555,
+        "targetSpend": 3842401,
+        "targetCPA": 6923
+      }
     },
     {
       "date": "2026-08-21",
@@ -192,7 +274,12 @@
       "ctr": 3.23,
       "cpm": 26196,
       "frequency": 1.08,
-      "openEvents": 740
+      "openEvents": 740,
+      "planSnapshot": {
+        "targetLeads": 555,
+        "targetSpend": 3842401,
+        "targetCPA": 6923
+      }
     },
     {
       "date": "2026-08-22",
@@ -204,7 +291,12 @@
       "ctr": 3.15,
       "cpm": 31782,
       "frequency": 1.12,
-      "openEvents": 693
+      "openEvents": 693,
+      "planSnapshot": {
+        "targetLeads": 1500,
+        "targetSpend": 11333333,
+        "targetCPA": 7500
+      }
     },
     {
       "date": "2026-08-23",
@@ -216,7 +308,12 @@
       "ctr": 3.5,
       "cpm": 34417,
       "frequency": 1.09,
-      "openEvents": 730
+      "openEvents": 730,
+      "planSnapshot": {
+        "targetLeads": 1500,
+        "targetSpend": 11333333,
+        "targetCPA": 7500
+      }
     },
     {
       "date": "2026-08-24",
@@ -228,7 +325,12 @@
       "ctr": 3.11,
       "cpm": 36998,
       "frequency": 1.19,
-      "openEvents": 955
+      "openEvents": 955,
+      "planSnapshot": {
+        "targetLeads": 1500,
+        "targetSpend": 11333333,
+        "targetCPA": 7500
+      }
     },
     {
       "date": "2026-08-25",
@@ -240,7 +342,12 @@
       "ctr": 2.88,
       "cpm": 37659,
       "frequency": 1.15,
-      "openEvents": 408
+      "openEvents": 408,
+      "planSnapshot": {
+        "targetLeads": 1486,
+        "targetSpend": 13428571,
+        "targetCPA": 9000
+      }
     }
   ],
   "adsets": [

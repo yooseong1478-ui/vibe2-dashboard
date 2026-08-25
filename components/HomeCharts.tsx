@@ -30,7 +30,8 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointEleme
 export interface HomeChartsProps {
   labels: string[];
   // A
-  planPerDay: number[];
+  planPerDay: number[];          // 계획선 (동결 스냅샷 + 동적 재계산)
+  baselinePerDay?: number[];     // 최초 수립 계획 (회색 점선, 누적 편차 추적용)
   actualDaily: (number | null)[];
   // B
   cpaDaily: (number | null)[];
@@ -201,7 +202,10 @@ export default function HomeCharts(props: HomeChartsProps) {
   const dataA: ChartData<any> = {
     labels: props.labels,
     datasets: [
-      { type: "line" as const, label: "계획", data: props.planPerDay, borderColor: gray, borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0, tension: 0.15, order: 1 },
+      ...(props.baselinePerDay
+        ? [{ type: "line" as const, label: "최초 계획", data: props.baselinePerDay, borderColor: gray, borderDash: [2, 4], borderWidth: 1, pointRadius: 0, tension: 0.15, order: 0 }]
+        : []),
+      { type: "line" as const, label: "계획(재계산)", data: props.planPerDay, borderColor: orange, borderDash: [5, 4], borderWidth: 1.8, pointRadius: 0, tension: 0.15, order: 1 },
       { type: "bar" as const, label: "실측", data: props.actualDaily as number[], backgroundColor: blue, borderRadius: 3, order: 2 },
     ],
   };

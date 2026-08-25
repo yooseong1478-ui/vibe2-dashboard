@@ -1,0 +1,11 @@
+{
+  "vibe2PaceCurve": {
+    "note": "동적 재계산 가중치 곡선 (2026-08-25 지침서). 웨비나까지 남은 일수(daysToLive, 당일 포함) 기준 상대 위치 — 날짜 하드코딩 금지. 곡선이 없으면 replan 은 에러를 낸다(균등분배 폴백 금지).",
+    "byDaysToLive": [
+      { "minD": 13, "maxD": 999, "phase": "램프업", "weight": 0.8, "baseCPA": 9500 },
+      { "minD": 7, "maxD": 12, "phase": "본집행", "weight": 1.03, "baseCPA": 10000 },
+      { "minD": 3, "maxD": 6, "phase": "고점", "weight": 1.11, "baseCPA": 10500 },
+      { "minD": 1, "maxD": 2, "phase": "마감", "weight": 0.91, "baseCPA": 9500 }
+    ]
+  }
+}

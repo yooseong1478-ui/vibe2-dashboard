@@ -15,6 +15,13 @@ export interface Goals {
   landing?: { kLookup: [number, number][]; baseHaircut: number; conservativeHaircut: number };
   // 게이트 (의사결정 포인트) — cum 게이트 기준값은 플랜 곡선의 해당일 누적에서 동적 계산
   gates?: GateDef[];
+  // 동적 재계산 가드레일 (lib/replan.ts)
+  replan?: {
+    dailySpendCap: number;    // 일 지출 절대 상한 (2,000만 — 한계 CPA가 알림 가치에 근접)
+    rampCapRatio: number;     // 전일 대비 증액 상한 배수 (1.5 — 학습 리셋 방지)
+    minAllowedCpa: number;    // 허용 CPA(잔여예산÷잔여목표) 하한 — 밑돌면 목표 하향 경고
+    maxDailyLeads: number;    // 물리 한계 (일 2,200명)
+  };
   targetCpa?: number;         // 블렌디드 목표 CPA (5,000)
   cpaHardCap: number;         // CPA 하드캡 (5,500)
   signalGreenMax: number;     // 신호등 그린 상한 (4,500)
@@ -51,8 +58,16 @@ export interface GateDef {
   label: string;
   type: "cpa" | "cum";
   max?: number;               // cpa 게이트: 3일 이동 CPA 상한
+  target?: number;            // cum 게이트: 절대 기준 누적 (있으면 플랜 명목 누적 대신 이 값)
   tolerance?: number;         // cum 게이트: 허용 오차 (0.15 = ±15%)
   action: string;             // 미달/초과 시 조치
+}
+
+// 하루 마감 시점의 "그날 목표" 동결본 — 재계산이 과거로 소급되면 계획대비 차트가 무의미해진다
+export interface PlanSnapshot {
+  targetLeads: number;
+  targetSpend: number;
+  targetCPA: number;
 }
 
 export interface DailyRecord {
@@ -66,6 +81,7 @@ export interface DailyRecord {
   cpm: number | null;         // CPM (원)
   frequency: number | null;   // 빈도
   openEvents: number | null;  // openEvent 픽셀 전환 (메타, 자동)
+  planSnapshot?: PlanSnapshot; // 그날의 목표 동결본 (인제스트 시 자동 기록, 소급 변경 금지)
 }
 
 export interface AdsetRecord {

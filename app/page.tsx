@@ -1,5 +1,6 @@
 import { getDataset } from "@/lib/dataStore";
-import { computeView, computeSignalHistory, bandsForDate, dayIndex, planForDate, todayKST, diffDays } from "@/lib/metrics";
+import { computeView, computeSignalHistory, bandsForDate, dayIndex, planForDate, todayKST, diffDays, addDays } from "@/lib/metrics";
+import { replanFuture } from "@/lib/replan";
 import { won, num, pct, money, eok, shortDate } from "@/lib/format";
 import HomeCharts from "@/components/HomeCharts";
 import { getTestingAdsCached } from "@/lib/meta";
@@ -57,9 +58,45 @@ export default async function DashboardPage() {
     actualCumSpend.push(rec?.spend != null && dayIndex(p.date) <= latestDataIdx ? runSpend : null);
     actualCumLeads.push(rec?.leadsCum ?? null);
   }
-  // 페이스 갭 = 누적 실측 − 누적 목표 (실측이 있는 날만)
-  const gapLeads = actualCumLeads.map((a, i) => (a == null ? null : a - planCumLeads[i]));
-  const gapSpend = actualCumSpend.map((a, i) => (a == null ? null : a - planCumSpend[i]));
+  // ── 동적 재계산 (lib/replan.ts) — 미래 목표는 저장하지 않고 매 렌더 계산 ──
+  const todayIso0 = todayKST(now);
+  let rp: ReturnType<typeof replanFuture> | null = null;
+  let rpError: string | null = null;
+  try {
+    rp = replanFuture(data, todayIso0);
+  } catch (e: any) {
+    rpError = e?.message ?? String(e);
+  }
+  const rpByDate = new Map((rp?.days ?? []).map((d) => [d.date, d]));
+
+  // effective 계획 = 과거 planSnapshot(동결) + 미래 재계산. baseline(최초 수립 계획)은 planCurve 그대로.
+  const effPerDay = v.planCurve.map((p) => {
+    if (dayIndex(p.date) < dayIndex(todayIso0)) {
+      const snap = dailyByDate.get(p.date)?.planSnapshot;
+      return snap ? snap.targetLeads : p.perDay;
+    }
+    return rpByDate.get(p.date)?.targetLeads ?? p.perDay;
+  });
+  const effSpendDaily = v.planCurve.map((p) => {
+    if (dayIndex(p.date) < dayIndex(todayIso0)) {
+      const snap = dailyByDate.get(p.date)?.planSnapshot;
+      return snap ? snap.targetSpend : p.dailyBudget;
+    }
+    return rpByDate.get(p.date)?.budget ?? p.dailyBudget;
+  });
+  const effCumLeads: number[] = [];
+  const effCumSpend: number[] = [];
+  {
+    let cl = 0, cs = 0;
+    for (let i = 0; i < v.planCurve.length; i++) {
+      cl += effPerDay[i]; cs += effSpendDaily[i];
+      effCumLeads.push(Math.round(cl)); effCumSpend.push(Math.round(cs));
+    }
+  }
+
+  // 페이스 갭 = 누적 실측 − 누적 목표(동결+재계산 기준)
+  const gapLeads = actualCumLeads.map((a, i) => (a == null ? null : a - effCumLeads[i]));
+  const gapSpend = actualCumSpend.map((a, i) => (a == null ? null : a - effCumSpend[i]));
 
   const liveDates = g.liveDates?.length ? g.liveDates : [g.webinarDate];
   const liveIdx = liveDates.map((d) => v.planCurve.findIndex((p) => p.date === d)).filter((i) => i >= 0);
@@ -177,6 +214,22 @@ export default async function DashboardPage() {
   const curStepNo = data.plan.indexOf(curStep) + 1;
   const todayPlan = planForDate(data, today);
 
+  // 오늘의 재계산 목표 + 어제 초과/미달 (스냅샷 대비)
+  const rpToday = rpByDate.get(today) ?? null;
+  const yRec = dailyByDate.get(addDays(today, -1));
+  const yesterSnapDelta =
+    yRec?.dailyLeads != null && yRec.planSnapshot ? yRec.dailyLeads - yRec.planSnapshot.targetLeads : null;
+
+  // 재계산 사유 로그 — 최근 완결일 3건 (스냅샷 있는 날만)
+  const replanLog = v.derived
+    .filter((r) => r.dailyLeads != null && r.planSnapshot)
+    .slice(-3)
+    .reverse()
+    .map((r) => {
+      const dlt = (r.dailyLeads as number) - r.planSnapshot!.targetLeads;
+      return `${shortDate(r.date)} 실적 ${num(r.dailyLeads)}명 (${num(dlt, { sign: true })})`;
+    });
+
   // KPI 행 카드 수 (값 없는 카드는 접고 열 수 자동 조정)
   const kpiCols = 2 + (lastC ? 1 : 0) + (landing.base !== null ? 1 : 0);
 
@@ -206,7 +259,7 @@ export default async function DashboardPage() {
       current = v.rolling3Cpa != null ? `현재 ${won(v.rolling3Cpa)}` : "실측 대기";
       if (due && v.rolling3Cpa != null) status = v.rolling3Cpa <= (gt.max ?? Infinity) ? "pass" : "fail";
     } else {
-      const base = planCumAt(gt.date);
+      const base = gt.target ?? planCumAt(gt.date);
       const tol = gt.tolerance ?? 0;
       const min = base != null ? Math.round(base * (1 - tol)) : null;
       target = base != null ? `누적 ${num(base)} ±${Math.round(tol * 100)}%` : "";
@@ -372,10 +425,16 @@ export default async function DashboardPage() {
           <div className="eyebrow">KPI</div>
           <div className={`grid grid-${kpiCols}`}>
             <div className="card kpi">
-              <div className="label">오늘 필요 인원</div>
-              <div className="value">{num(v.todayRequired)}<span className="unit">/일</span></div>
+              <div className="label">
+                오늘 필요 인원 <Tip text="동적 재계산: 잔여 목표를 페이스 곡선 가중치로 남은 날에 배분. 어제 초과/미달분이 자동 반영됩니다." />
+              </div>
+              <div className="value">{num(rpToday?.targetLeads ?? v.todayRequired)}<span className="unit">/일</span></div>
               <div className="foot">
-                {lastC ? (
+                {yesterSnapDelta !== null ? (
+                  <span className={`chip ${yesterSnapDelta >= 0 ? "pos" : "neg"}`}>
+                    {yesterSnapDelta >= 0 ? "↓" : "↑"} 어제 {num(yesterSnapDelta, { sign: true })}명 {yesterSnapDelta >= 0 ? "초과" : "미달"} 반영
+                  </span>
+                ) : lastC ? (
                   <>
                     어제 실측 {num(lastC.dailyLeads)}
                     <span className={`chip ${(lastVsPlan ?? 0) >= 100 ? "pos" : "mute"}`}>플랜 대비 {pct(lastVsPlan, 0)}</span>
@@ -421,6 +480,40 @@ export default async function DashboardPage() {
             )}
           </div>
         </div>
+
+        {/* 3.5 재계산 상태 — 가드레일 경고는 조용히 넘기지 않는다 */}
+        {rpError && <div className="banner err">재계산 불가: {rpError}</div>}
+        {rp && rp.warnings.includes("BUDGET_EXHAUSTED") && (
+          <div className="banner err">🔴 잔여 예산 소진 — 집행 중단 검토</div>
+        )}
+        {rp && rp.warnings.includes("LOW_ALLOWED_CPA") && (
+          <div className="banner err">
+            🔴 예산 부족 — 허용 CPA {won(rp.allowedCPA)} &lt; ₩{num(g.replan?.minAllowedCpa ?? 8000)}. 목표 하향 필요
+            {rp.achievableLeads !== null && <> · 현 제약 하 달성 가능 최대 {num(rp.achievableLeads)}명</>}
+          </div>
+        )}
+        {rp && rp.warnings.includes("PHYSICAL_LIMIT") && (
+          <div className="banner err">
+            🔴 물리 한계 초과 — 필요 일평균 {num(rp.perDayNeeded)}명 &gt; {num(g.replan?.maxDailyLeads ?? 2200)}명. 목표 재협상 필요
+            {rp.achievableLeads !== null && <> · 달성 가능 최대 {num(rp.achievableLeads)}명</>}
+          </div>
+        )}
+        {rp && rp.achievableLeads !== null && !rp.warnings.length && (
+          <div className="banner warn">
+            ⚠ 가드레일 캡 적용으로 계획 총합이 잔여 목표에 못 미칩니다 — 달성 가능 최대 {num(rp.achievableLeads)}명
+          </div>
+        )}
+        {replanLog.length > 0 && (
+          <div className="section">
+            <div className="card oneline">
+              <span className="ol-label">재계산</span>
+              <span className="ol-main" style={{ fontSize: 12.5 }}>
+                {replanLog.join(" · ")}
+                {rp && <> → 잔여 {num(rp.remainingLeads)}명 / 일평균 {num(rp.perDayNeeded)}명 재산정</>}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* 4. 기대수익 3카드 — 1차 웨비나 2.5~3.5% / 최종 5.0% */}
         <div className="section" id="revenue">
@@ -474,12 +567,13 @@ export default async function DashboardPage() {
           )}
           <HomeCharts
             labels={labels}
-            planPerDay={planPerDay}
+            planPerDay={effPerDay}
+            baselinePerDay={planPerDay}
             actualDaily={actualDaily}
             cpaDaily={cpaDaily}
             cpaRolling={cpaRolling}
             zones={zones}
-            planSpendDaily={planSpendDaily}
+            planSpendDaily={effSpendDaily}
             spendDaily={v.planCurve.map((p) => dailyByDate.get(p.date)?.spend ?? null)}
             gapLeads={gapLeads}
             gapSpend={gapSpend}
@@ -521,8 +615,46 @@ export default async function DashboardPage() {
               {money(curStep.dailyBudget * curStep.days)} · 목표 CPA {won(curStep.targetCpa)}
             </span>
           </div>
+          {rp && rp.days.length > 0 && (
+            <div className="card table-scroll" style={{ marginTop: 8 }}>
+              <table>
+                <thead>
+                  <tr><th>날짜</th><th>구간</th><th>목표 알림</th><th>일 예산</th><th>목표 CPA</th><th>비고</th></tr>
+                </thead>
+                <tbody>
+                  {rp.days.map((rd) => {
+                    const basePlan = planForDate(data, rd.date);
+                    const dlt = basePlan ? rd.targetLeads - basePlan.perDay : null;
+                    return (
+                      <tr key={rd.date} className={rd.date === today ? "total" : ""}>
+                        <td>{shortDate(rd.date)}</td>
+                        <td>{rd.phase}</td>
+                        <td className="mono">
+                          {num(rd.targetLeads)}
+                          {dlt !== null && dlt !== 0 && (
+                            <span className={dlt > 0 ? "neg" : "pos"} style={{ fontSize: 11, marginLeft: 4 }}>
+                              ({num(dlt, { sign: true })})
+                            </span>
+                          )}
+                        </td>
+                        <td className="mono">{money(rd.budget)}</td>
+                        <td className="mono">{won(rd.targetCPA)}</td>
+                        <td>
+                          {rd.flags.includes("SPEND_CAP") && <span className="chip warn">캡 2,000만</span>}
+                          {rd.flags.includes("RAMP_CAP") && <span className="chip warn">학습 리셋 위험 ×1.5 캡</span>}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              <div className="hint" style={{ padding: "8px 4px 2px", fontSize: 11 }}>
+                실적 입력 시 자동 재계산 · (±n) = 최초 계획 대비 변동 · 과거 목표는 동결(planSnapshot)
+              </div>
+            </div>
+          )}
           <details style={{ marginTop: 8 }}>
-            <summary>전체 플랜 보기</summary>
+            <summary>전체 플랜 보기 (구간 기준)</summary>
             <div className="card table-scroll" style={{ marginTop: 8 }}>
               <table>
                 <thead>

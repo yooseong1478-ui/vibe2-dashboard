@@ -1,4 +1,5 @@
 // 저장 파이프라인: 검증 → 메타 수집 → 병합 → 저장.
+import { replanForDate } from "./replan";
 import "server-only";
 import type { Dataset, DailyRecord } from "./types";
 import { dayIndex, todayKST, diffDays, deriveDaily } from "./metrics";
@@ -123,6 +124,7 @@ export async function runIngest(data: Dataset, input: IngestInput, nowMs: number
     const merged: DailyRecord = {
       date: row.date,
       leads: existing?.leads ?? null,
+      ...(existing?.planSnapshot ? { planSnapshot: existing.planSnapshot } : {}),
       openTalkCum: existing?.openTalkCum ?? null,
       spend: row.spend,
       impressions: row.impressions,
@@ -151,6 +153,10 @@ export async function runIngest(data: Dataset, input: IngestInput, nowMs: number
   };
   target.leads = input.leads;
   if (input.openTalkCum != null) target.openTalkCum = input.openTalkCum;
+  if (!target.planSnapshot) {
+    const snap = replanForDate(data, input.date);
+    if (snap) target.planSnapshot = snap;
+  }
   byDate.set(input.date, target);
 
   // 세트별 병합: 수집 범위 내 날짜의 기존 adset 제거 후 새 값으로 교체
