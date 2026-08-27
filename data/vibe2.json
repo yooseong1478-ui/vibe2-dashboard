@@ -8,7 +8,7 @@
       "120253615420350198",
       "120253690992100198"
     ],
-    "lastUpdated": "2026-08-26T01:09:35.251Z",
+    "lastUpdated": "2026-08-27T01:01:24.659Z",
     "note": "원본값만 저장. 파생값은 프론트 계산. 2026-08-25 일별 목표 변경: 8/26~9/8 램프업/본집행/고점/마감 4구간, 한계 CPA 기준 운영. 미래 목표는 lib/replan.ts 동적 재계산 — 과거는 daily[].planSnapshot 동결. 대상 캠페인 3개(메인+서브+사본)."
   },
   "goals": {
@@ -351,20 +351,20 @@
     },
     {
       "date": "2026-08-26",
-      "leads": 667,
-      "openTalkCum": null,
-      "spend": 6262251,
-      "impressions": 195065,
-      "clicks": 4716,
-      "ctr": 2.42,
-      "cpm": 32103,
-      "frequency": 1.15,
-      "openEvents": 648,
+      "leads": 1836,
       "planSnapshot": {
         "targetLeads": 1331,
         "targetSpend": 13126742,
         "targetCPA": 9866
-      }
+      },
+      "openTalkCum": null,
+      "spend": 19125038,
+      "impressions": 710780,
+      "clicks": 16105,
+      "ctr": 2.27,
+      "cpm": 26907,
+      "frequency": 1.39,
+      "openEvents": 1894
     }
   ],
   "adsets": [
@@ -903,10 +903,10 @@
       "adsetId": "120253576478470198",
       "name": "논타겟",
       "campaignId": "120253576478460198",
-      "spend": 4841545,
-      "impressions": 161871,
-      "clicks": 3766,
-      "openEvents": 481
+      "spend": 14204605,
+      "impressions": 565026,
+      "clicks": 12448,
+      "openEvents": 1399
     },
     {
       "date": "2026-08-26",
@@ -923,10 +923,30 @@
       "adsetId": "120253661630860198",
       "name": "테스트(위닝1)",
       "campaignId": "120253576478460198",
-      "spend": 576658,
-      "impressions": 10830,
-      "clicks": 370,
-      "openEvents": 41
+      "spend": 748849,
+      "impressions": 13997,
+      "clicks": 500,
+      "openEvents": 58
+    },
+    {
+      "date": "2026-08-26",
+      "adsetId": "120253690992320198",
+      "name": "테스트1",
+      "campaignId": "120253690992100198",
+      "spend": 0,
+      "impressions": 0,
+      "clicks": 0,
+      "openEvents": 0
+    },
+    {
+      "date": "2026-08-26",
+      "adsetId": "120253691052350198",
+      "name": "테스트2",
+      "campaignId": "120253690992100198",
+      "spend": 0,
+      "impressions": 0,
+      "clicks": 0,
+      "openEvents": 0
     },
     {
       "date": "2026-08-26",
@@ -940,13 +960,23 @@
     },
     {
       "date": "2026-08-26",
+      "adsetId": "120253691101740198",
+      "name": "테스트5",
+      "campaignId": "120253690992100198",
+      "spend": 0,
+      "impressions": 0,
+      "clicks": 0,
+      "openEvents": 0
+    },
+    {
+      "date": "2026-08-26",
       "adsetId": "120253698431430198",
       "name": "테스트11",
       "campaignId": "120253690992100198",
-      "spend": 53248,
-      "impressions": 1459,
-      "clicks": 41,
-      "openEvents": 11
+      "spend": 483899,
+      "impressions": 15427,
+      "clicks": 291,
+      "openEvents": 48
     },
     {
       "date": "2026-08-26",
@@ -956,17 +986,27 @@
       "spend": 0,
       "impressions": 0,
       "clicks": 0,
-      "openEvents": 0
+      "openEvents": 1
     },
     {
       "date": "2026-08-26",
       "adsetId": "120253698434290198",
       "name": "테스트13",
       "campaignId": "120253690992100198",
-      "spend": 191835,
-      "impressions": 6335,
-      "clicks": 164,
-      "openEvents": 28
+      "spend": 848473,
+      "impressions": 34240,
+      "clicks": 714,
+      "openEvents": 95
+    },
+    {
+      "date": "2026-08-26",
+      "adsetId": "120253698435330198",
+      "name": "테스트14",
+      "campaignId": "120253690992100198",
+      "spend": 0,
+      "impressions": 0,
+      "clicks": 0,
+      "openEvents": 0
     },
     {
       "date": "2026-08-26",
@@ -993,8 +1033,8 @@
       "adsetId": "120253711002820198",
       "name": "테스트18",
       "campaignId": "120253690992100198",
-      "spend": 60904,
-      "impressions": 2569,
+      "spend": 60953,
+      "impressions": 2571,
       "clicks": 52,
       "openEvents": 16
     },
@@ -1013,10 +1053,10 @@
       "adsetId": "120253717342100198",
       "name": "테스트20",
       "campaignId": "120253690992100198",
-      "spend": 490059,
-      "impressions": 11115,
-      "clicks": 298,
-      "openEvents": 66
+      "spend": 2730270,
+      "impressions": 78634,
+      "clicks": 2075,
+      "openEvents": 272
     }
   ],
   "creatives": {
