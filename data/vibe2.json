@@ -8,7 +8,7 @@
       "120253615420350198",
       "120253690992100198"
     ],
-    "lastUpdated": "2026-08-27T09:22:23.111Z",
+    "lastUpdated": "2026-08-28T01:41:57.957Z",
     "note": "원본값만 저장. 파생값은 프론트 계산. 2026-08-25 일별 목표 변경: 8/26~9/8 램프업/본집행/고점/마감 4구간, 한계 CPA 기준 운영. 미래 목표는 lib/replan.ts 동적 재계산 — 과거는 daily[].planSnapshot 동결. 대상 캠페인 3개(메인+서브+사본)."
   },
   "goals": {
@@ -368,20 +368,20 @@
     },
     {
       "date": "2026-08-27",
-      "leads": 0,
-      "openTalkCum": null,
-      "spend": 9879640,
-      "impressions": 327461,
-      "clicks": 8291,
-      "ctr": 2.53,
-      "cpm": 30170,
-      "frequency": 1.26,
-      "openEvents": 939,
+      "leads": 1417,
       "planSnapshot": {
         "targetLeads": 1295,
         "targetSpend": 12737128,
         "targetCPA": 9834
-      }
+      },
+      "openTalkCum": null,
+      "spend": 14342586,
+      "impressions": 483856,
+      "clicks": 12051,
+      "ctr": 2.49,
+      "cpm": 29642,
+      "frequency": 1.37,
+      "openEvents": 1448
     }
   ],
   "adsets": [
@@ -1080,10 +1080,10 @@
       "adsetId": "120253576478470198",
       "name": "논타겟",
       "campaignId": "120253576478460198",
-      "spend": 8349978,
-      "impressions": 286750,
-      "clicks": 7194,
-      "openEvents": 783
+      "spend": 11626348,
+      "impressions": 400526,
+      "clicks": 10122,
+      "openEvents": 1147
     },
     {
       "date": "2026-08-27",
@@ -1100,10 +1100,10 @@
       "adsetId": "120253661630860198",
       "name": "테스트(위닝1)",
       "campaignId": "120253576478460198",
-      "spend": 277311,
-      "impressions": 4306,
-      "clicks": 178,
-      "openEvents": 20
+      "spend": 309379,
+      "impressions": 4888,
+      "clicks": 203,
+      "openEvents": 22
     },
     {
       "date": "2026-08-27",
@@ -1130,8 +1130,8 @@
       "adsetId": "120253698431430198",
       "name": "테스트11",
       "campaignId": "120253690992100198",
-      "spend": 291701,
-      "impressions": 7784,
+      "spend": 291734,
+      "impressions": 7786,
       "clicks": 185,
       "openEvents": 40
     },
@@ -1140,8 +1140,8 @@
       "adsetId": "120253698434290198",
       "name": "테스트13",
       "campaignId": "120253690992100198",
-      "spend": 379391,
-      "impressions": 12479,
+      "spend": 380040,
+      "impressions": 12487,
       "clicks": 278,
       "openEvents": 41
     },
@@ -1167,43 +1167,83 @@
     },
     {
       "date": "2026-08-27",
+      "adsetId": "120253711002820198",
+      "name": "테스트18",
+      "campaignId": "120253690992100198",
+      "spend": 0,
+      "impressions": 0,
+      "clicks": 0,
+      "openEvents": 0
+    },
+    {
+      "date": "2026-08-27",
+      "adsetId": "120253717341690198",
+      "name": "테스트19",
+      "campaignId": "120253690992100198",
+      "spend": 0,
+      "impressions": 0,
+      "clicks": 0,
+      "openEvents": 0
+    },
+    {
+      "date": "2026-08-27",
       "adsetId": "120253717342100198",
       "name": "테스트20",
       "campaignId": "120253690992100198",
-      "spend": 509185,
-      "impressions": 13581,
+      "spend": 510144,
+      "impressions": 13585,
       "clicks": 399,
-      "openEvents": 53
+      "openEvents": 54
     },
     {
       "date": "2026-08-27",
       "adsetId": "120253760838690198",
       "name": "테스트21",
       "campaignId": "120253690992100198",
-      "spend": 26589,
-      "impressions": 924,
-      "clicks": 30,
-      "openEvents": 1
+      "spend": 435818,
+      "impressions": 14534,
+      "clicks": 292,
+      "openEvents": 47
     },
     {
       "date": "2026-08-27",
       "adsetId": "120253760840520198",
       "name": "테스트23",
       "campaignId": "120253690992100198",
-      "spend": 26221,
-      "impressions": 969,
-      "clicks": 19,
-      "openEvents": 1
+      "spend": 353682,
+      "impressions": 14283,
+      "clicks": 271,
+      "openEvents": 46
     },
     {
       "date": "2026-08-27",
       "adsetId": "120253761035620198",
       "name": "테스트22",
       "campaignId": "120253690992100198",
-      "spend": 19264,
-      "impressions": 668,
-      "clicks": 8,
-      "openEvents": 0
+      "spend": 82702,
+      "impressions": 2983,
+      "clicks": 50,
+      "openEvents": 12
+    },
+    {
+      "date": "2026-08-27",
+      "adsetId": "120253761561150198",
+      "name": "테스트24",
+      "campaignId": "120253690992100198",
+      "spend": 141994,
+      "impressions": 4932,
+      "clicks": 117,
+      "openEvents": 19
+    },
+    {
+      "date": "2026-08-27",
+      "adsetId": "120253763244600198",
+      "name": "테스트25",
+      "campaignId": "120253690992100198",
+      "spend": 210745,
+      "impressions": 7852,
+      "clicks": 134,
+      "openEvents": 20
     }
   ],
   "creatives": {
