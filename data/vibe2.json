@@ -8,7 +8,7 @@
       "120253615420350198",
       "120253690992100198"
     ],
-    "lastUpdated": "2026-08-28T01:41:57.957Z",
+    "lastUpdated": "2026-08-30T03:53:01.618Z",
     "note": "원본값만 저장. 파생값은 프론트 계산. 2026-08-25 일별 목표 변경: 8/26~9/8 램프업/본집행/고점/마감 4구간, 한계 CPA 기준 운영. 미래 목표는 lib/replan.ts 동적 재계산 — 과거는 daily[].planSnapshot 동결. 대상 캠페인 3개(메인+서브+사본)."
   },
   "goals": {
@@ -368,18 +368,18 @@
     },
     {
       "date": "2026-08-27",
-      "leads": 1417,
+      "leads": 1307,
       "planSnapshot": {
         "targetLeads": 1295,
         "targetSpend": 12737128,
         "targetCPA": 9834
       },
       "openTalkCum": null,
-      "spend": 14342586,
-      "impressions": 483856,
-      "clicks": 12051,
+      "spend": 14346079,
+      "impressions": 483904,
+      "clicks": 12052,
       "ctr": 2.49,
-      "cpm": 29642,
+      "cpm": 29647,
       "frequency": 1.37,
       "openEvents": 1448
     }
@@ -1080,9 +1080,9 @@
       "adsetId": "120253576478470198",
       "name": "논타겟",
       "campaignId": "120253576478460198",
-      "spend": 11626348,
-      "impressions": 400526,
-      "clicks": 10122,
+      "spend": 11629431,
+      "impressions": 400566,
+      "clicks": 10123,
       "openEvents": 1147
     },
     {
@@ -1100,8 +1100,8 @@
       "adsetId": "120253661630860198",
       "name": "테스트(위닝1)",
       "campaignId": "120253576478460198",
-      "spend": 309379,
-      "impressions": 4888,
+      "spend": 309574,
+      "impressions": 4889,
       "clicks": 203,
       "openEvents": 22
     },
@@ -1200,8 +1200,8 @@
       "adsetId": "120253760838690198",
       "name": "테스트21",
       "campaignId": "120253690992100198",
-      "spend": 435818,
-      "impressions": 14534,
+      "spend": 435983,
+      "impressions": 14539,
       "clicks": 292,
       "openEvents": 47
     },
@@ -1230,8 +1230,8 @@
       "adsetId": "120253761561150198",
       "name": "테스트24",
       "campaignId": "120253690992100198",
-      "spend": 141994,
-      "impressions": 4932,
+      "spend": 142007,
+      "impressions": 4933,
       "clicks": 117,
       "openEvents": 19
     },
@@ -1240,8 +1240,8 @@
       "adsetId": "120253763244600198",
       "name": "테스트25",
       "campaignId": "120253690992100198",
-      "spend": 210745,
-      "impressions": 7852,
+      "spend": 210782,
+      "impressions": 7853,
       "clicks": 134,
       "openEvents": 20
     }
