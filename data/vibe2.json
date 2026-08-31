@@ -8,7 +8,7 @@
       "120253615420350198",
       "120253690992100198"
     ],
-    "lastUpdated": "2026-08-31T01:04:59.301Z",
+    "lastUpdated": "2026-08-31T01:09:42.967Z",
     "note": "원본값만 저장. 파생값은 프론트 계산. 2026-08-25 일별 목표 변경: 8/26~9/8 램프업/본집행/고점/마감 4구간, 한계 CPA 기준 운영. 미래 목표는 lib/replan.ts 동적 재계산 — 과거는 daily[].planSnapshot 동결. 대상 캠페인 3개(메인+서브+사본)."
   },
   "goals": {
@@ -215,7 +215,7 @@
   "daily": [
     {
       "date": "2026-08-18",
-      "leads": 173,
+      "leads": 121,
       "openTalkCum": null,
       "spend": 1094785,
       "impressions": 30471,
@@ -232,7 +232,7 @@
     },
     {
       "date": "2026-08-19",
-      "leads": 562,
+      "leads": 398,
       "openTalkCum": null,
       "spend": 3642731,
       "impressions": 103745,
@@ -249,7 +249,7 @@
     },
     {
       "date": "2026-08-20",
-      "leads": 1037,
+      "leads": 828,
       "openTalkCum": null,
       "spend": 7755828,
       "impressions": 274196,
@@ -266,7 +266,7 @@
     },
     {
       "date": "2026-08-21",
-      "leads": 725,
+      "leads": 618,
       "openTalkCum": null,
       "spend": 6483196,
       "impressions": 247491,
@@ -283,7 +283,7 @@
     },
     {
       "date": "2026-08-22",
-      "leads": 698,
+      "leads": 581,
       "openTalkCum": null,
       "spend": 6080652,
       "impressions": 191326,
@@ -300,7 +300,7 @@
     },
     {
       "date": "2026-08-23",
-      "leads": 737,
+      "leads": 612,
       "openTalkCum": null,
       "spend": 7280201,
       "impressions": 211533,
@@ -317,7 +317,7 @@
     },
     {
       "date": "2026-08-24",
-      "leads": 947,
+      "leads": 777,
       "openTalkCum": null,
       "spend": 9423786,
       "impressions": 254652,
@@ -334,7 +334,7 @@
     },
     {
       "date": "2026-08-25",
-      "leads": 1850,
+      "leads": 1566,
       "openTalkCum": null,
       "spend": 16072449,
       "impressions": 503703,
@@ -351,7 +351,7 @@
     },
     {
       "date": "2026-08-26",
-      "leads": 1836,
+      "leads": 1631,
       "openTalkCum": null,
       "spend": 19125942,
       "impressions": 710821,
@@ -368,7 +368,7 @@
     },
     {
       "date": "2026-08-27",
-      "leads": 1307,
+      "leads": 1291,
       "planSnapshot": {
         "targetLeads": 1295,
         "targetSpend": 12737128,
@@ -385,7 +385,7 @@
     },
     {
       "date": "2026-08-28",
-      "leads": 1436,
+      "leads": 1378,
       "planSnapshot": {
         "targetLeads": 1667,
         "targetSpend": 17129574,
@@ -402,7 +402,7 @@
     },
     {
       "date": "2026-08-29",
-      "leads": 2804,
+      "leads": 2709,
       "planSnapshot": {
         "targetLeads": 1687,
         "targetSpend": 17066812,
@@ -436,7 +436,7 @@
     },
     {
       "date": "2026-08-31",
-      "leads": 828,
+      "leads": 829,
       "openTalkCum": null,
       "spend": 11377064,
       "impressions": 355704,
