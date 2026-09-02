@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import AdPreviewModal from "./AdPreviewModal";
+import InlineAdPlayer from "./InlineAdPlayer";
 import type { TestingAdsResult, TestingAd } from "@/lib/meta";
 import { won, num, pct, shortDate } from "@/lib/format";
 
@@ -63,12 +64,9 @@ export default function TestingSection({ result, goodCpa, capCpa }: { result: Te
             {rows.map(({ ad, j }) => {
               const cpa = ad.openEvents ? ad.spend / ad.openEvents : null;
               return (
-                <button key={ad.adId} className="ccard" onClick={() => setZoom(ad)}>
-                  <div className={`cthumb ${ad.isVideo ? "video" : ""} ${!ad.thumb ? "ph" : ""}`}>
-                    {ad.thumb ? <img src={ad.thumb} alt={ad.name} loading="lazy" /> : <span>{ad.isVideo ? "🎬" : "🖼"}</span>}
-                    {ad.isVideo && ad.thumb && <span className="play">▶</span>}
-                  </div>
-                  <div className="cbody">
+                <div key={ad.adId} className="ccard">
+                  <InlineAdPlayer adId={ad.adId} thumb={ad.thumb} isVideo={ad.isVideo} name={ad.name} />
+                  <div className="cbody" onClick={() => setZoom(ad)} role="button" title="상세 보기">
                     <div className="cname" title={ad.name}>{ad.name}</div>
                     <div className="cmeta">
                       <span className={`dot ${ad.on ? "on" : "off"}`} />{ad.on ? "ON" : "OFF"}
@@ -86,7 +84,7 @@ export default function TestingSection({ result, goodCpa, capCpa }: { result: Te
                       <span className="hint" style={{ marginLeft: 6 }}>노출 {num(ad.impressions)} · CTR {pct(ad.ctr, 2)}</span>
                     </div>
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>

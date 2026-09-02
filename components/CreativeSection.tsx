@@ -1,6 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import AdPreviewModal from "./AdPreviewModal";
+import InlineAdPlayer from "./InlineAdPlayer";
 import type { CreativesBlock, CreativeItem, CreativeMetrics } from "@/lib/types";
 import { won, num, pct, shortDate } from "@/lib/format";
 
@@ -84,11 +85,12 @@ export default function CreativeSection({ block, compact = false, capCpa }: { bl
       {/* 갤러리 */}
       <div className="cgallery">
         {galleryRows.map(({ it, m, small }, idx) => (
-          <button key={it.adId ?? it.creativeId} className={`ccard ${!small && idx < 3 ? `rank-${idx + 1}` : ""}`} onClick={() => setZoom(it)}>
-            <Thumb item={it} />
+          <div key={it.adId ?? it.creativeId} className={`ccard ${!small && idx < 3 ? `rank-${idx + 1}` : ""}`}>
+            {/* 썸네일 = 카드 안 인라인 재생 (▶ 클릭 → 그 자리에서 미리보기 iframe) */}
+            <InlineAdPlayer adId={it.adId} thumb={it.thumb} isVideo={it.objectType === "VIDEO"} name={it.name} />
             {!small && idx < 3 && <span className={`rankbadge r${idx + 1}`}>{RANK[idx]}</span>}
             {small && <span className="rankbadge small-sample">표본부족</span>}
-            <div className="cbody">
+            <div className="cbody" onClick={() => setZoom(it)} role="button" title="상세 보기">
               <div className="cname" title={it.name}>{it.name}</div>
               <div className="cmeta">
                 <span className={`dot ${isOn(it.status) ? "on" : "off"}`} />{isOn(it.status) ? "ON" : "OFF"}
@@ -99,7 +101,7 @@ export default function CreativeSection({ block, compact = false, capCpa }: { bl
                 <span className={(cpa(m) ?? 0) > capCpa ? "neg" : ""}>CPA <b>{won(cpa(m))}</b></span>
               </div>
             </div>
-          </button>
+          </div>
         ))}
         {rows.length === 0 && <div className="card" style={{ color: "hsl(var(--text-3))" }}>해당 기간 소재 데이터 없음</div>}
       </div>
