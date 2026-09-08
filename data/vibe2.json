@@ -8,7 +8,7 @@
       "120253615420350198",
       "120253690992100198"
     ],
-    "lastUpdated": "2026-09-08T01:19:18.619824Z",
+    "lastUpdated": "2026-09-08T01:53:18.719Z",
     "note": "원본값만 저장. 파생값은 프론트 계산. 2026-08-25 일별 목표 변경: 8/26~9/8 램프업/본집행/고점/마감 4구간, 한계 CPA 기준 운영. 미래 목표는 lib/replan.ts 동적 재계산 — 과거는 daily[].planSnapshot 동결. 대상 캠페인 3개(메인+서브+사본)."
   },
   "goals": {
@@ -666,20 +666,20 @@
     },
     {
       "date": "2026-09-08",
-      "leads": 1304,
-      "openTalkCum": null,
-      "spend": 12598009,
-      "impressions": 419567,
-      "clicks": 9546,
-      "ctr": 2.28,
-      "cpm": 30026,
-      "frequency": 1.23,
-      "openEvents": 1067,
+      "leads": 1723,
       "planSnapshot": {
         "targetLeads": 3597,
         "targetSpend": 19709172,
         "targetCPA": 5479
-      }
+      },
+      "openTalkCum": null,
+      "spend": 16259240,
+      "impressions": 544372,
+      "clicks": 12329,
+      "ctr": 2.26,
+      "cpm": 29868,
+      "frequency": 1.25,
+      "openEvents": 1518
     }
   ],
   "adsets": [
@@ -3268,10 +3268,10 @@
       "adsetId": "120253576478470198",
       "name": "논타겟",
       "campaignId": "120253576478460198",
-      "spend": 8349256,
-      "impressions": 269427,
-      "clicks": 6960,
-      "openEvents": 795
+      "spend": 10271516,
+      "impressions": 333915,
+      "clicks": 8567,
+      "openEvents": 1062
     },
     {
       "date": "2026-09-08",
@@ -3308,29 +3308,29 @@
       "adsetId": "120253698436050198",
       "name": "테스트15",
       "campaignId": "120253690992100198",
-      "spend": 434818,
-      "impressions": 12155,
-      "clicks": 355,
-      "openEvents": 29
+      "spend": 720848,
+      "impressions": 20441,
+      "clicks": 615,
+      "openEvents": 51
     },
     {
       "date": "2026-09-08",
       "adsetId": "120253711002820198",
       "name": "테스트18",
       "campaignId": "120253690992100198",
-      "spend": 207669,
-      "impressions": 11786,
-      "clicks": 149,
-      "openEvents": 10
+      "spend": 425949,
+      "impressions": 22694,
+      "clicks": 333,
+      "openEvents": 38
     },
     {
       "date": "2026-09-08",
       "adsetId": "120253761561150198",
       "name": "테스트24",
       "campaignId": "120253690992100198",
-      "spend": 19829,
-      "impressions": 870,
-      "clicks": 15,
+      "spend": 31458,
+      "impressions": 1287,
+      "clicks": 20,
       "openEvents": 4
     },
     {
@@ -3338,40 +3338,40 @@
       "adsetId": "120253838275700198",
       "name": "테스트28",
       "campaignId": "120253690992100198",
-      "spend": 251849,
-      "impressions": 7961,
-      "clicks": 150,
-      "openEvents": 19
+      "spend": 307174,
+      "impressions": 9330,
+      "clicks": 197,
+      "openEvents": 30
     },
     {
       "date": "2026-09-08",
       "adsetId": "120253838297660198",
       "name": "테스트29",
       "campaignId": "120253690992100198",
-      "spend": 759371,
-      "impressions": 17168,
-      "clicks": 452,
-      "openEvents": 59
+      "spend": 983845,
+      "impressions": 21909,
+      "clicks": 586,
+      "openEvents": 92
     },
     {
       "date": "2026-09-08",
       "adsetId": "120253921196220198",
       "name": "테스트34",
       "campaignId": "120253690992100198",
-      "spend": 259874,
-      "impressions": 8304,
-      "clicks": 114,
-      "openEvents": 16
+      "spend": 361655,
+      "impressions": 11292,
+      "clicks": 150,
+      "openEvents": 25
     },
     {
       "date": "2026-09-08",
       "adsetId": "120253944769160198",
       "name": "테스트36",
       "campaignId": "120253690992100198",
-      "spend": 1344959,
-      "impressions": 59022,
-      "clicks": 817,
-      "openEvents": 60
+      "spend": 1932865,
+      "impressions": 79596,
+      "clicks": 1172,
+      "openEvents": 116
     },
     {
       "date": "2026-09-08",
@@ -3388,8 +3388,8 @@
       "adsetId": "120253990755500198",
       "name": "top1",
       "campaignId": "120253576478460198",
-      "spend": 15278,
-      "impressions": 510,
+      "spend": 16902,
+      "impressions": 549,
       "clicks": 5,
       "openEvents": 1
     },
@@ -3398,30 +3398,30 @@
       "adsetId": "120253990757040198",
       "name": "POV",
       "campaignId": "120253576478460198",
-      "spend": 82337,
-      "impressions": 3726,
-      "clicks": 75,
-      "openEvents": 14
+      "spend": 103450,
+      "impressions": 4845,
+      "clicks": 92,
+      "openEvents": 15
     },
     {
       "date": "2026-09-08",
       "adsetId": "120253990760550198",
       "name": "침대(top2·4)",
       "campaignId": "120253576478460198",
-      "spend": 342806,
-      "impressions": 9288,
-      "clicks": 135,
-      "openEvents": 14
+      "spend": 348179,
+      "impressions": 9385,
+      "clicks": 136,
+      "openEvents": 15
     },
     {
       "date": "2026-09-08",
       "adsetId": "120253990762240198",
       "name": "노트북(top3·5)",
       "campaignId": "120253576478460198",
-      "spend": 529963,
-      "impressions": 19350,
-      "clicks": 319,
-      "openEvents": 45
+      "spend": 755399,
+      "impressions": 29129,
+      "clicks": 456,
+      "openEvents": 68
     }
   ],
   "creatives": {
