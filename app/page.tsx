@@ -139,9 +139,14 @@ export default async function DashboardPage() {
     red: "증액 or 소재 교체 트리거 — 기준 시나리오가 목표 미달",
     gray: "실측 대기",
   };
-  // 판단 카드 배경은 CPA 신호와 착지 신호 중 나쁜 쪽
+  // 착지 대표값: 사용자 확정값(landingOverride)이 있으면 산식 대신 그 값. 이때 착지 판정·액션 멘트는 쓰지 않는다.
+  const landFixed = g.landingOverride ?? null;
+  const landBase = landFixed ?? landing.base;
+  // 판단 카드 배경은 CPA 신호와 착지 신호 중 나쁜 쪽 (착지 고정 시 CPA 신호만)
   const RANK: Record<string, number> = { green: 0, yellow: 1, freeze: 2, red: 3, gray: 0 };
-  const cardLevel = RANK[landing.signal] > RANK[s.level] ? landing.signal : s.level;
+  const cardLevel = !landFixed && RANK[landing.signal] > RANK[s.level] ? landing.signal : s.level;
+  // 예상 웨비나 참석자 (착지 × 참석률 시나리오)
+  const att = g.attendance ?? null;
 
   // 전일(최신 완결일) 실측 + 그 날짜의 플랜
   const lastC = complete.length ? complete[complete.length - 1] : null;
@@ -231,7 +236,7 @@ export default async function DashboardPage() {
     });
 
   // KPI 행 카드 수 (값 없는 카드는 접고 열 수 자동 조정)
-  const kpiCols = 2 + (lastC ? 1 : 0) + (landing.base !== null ? 1 : 0);
+  const kpiCols = 2 + (lastC ? 1 : 0) + ((g.landingOverride ?? landing.base) !== null ? 1 : 0);
 
   // ── 게이트 자동 판정 ──
   // cum 게이트 기준값 = 플랜 "명목" 누적 (plan steps 에서 직접 계산).
@@ -298,6 +303,7 @@ export default async function DashboardPage() {
           { id: "cum", label: "누적" },
           { id: "kpi", label: "KPI" },
           { id: "revenue", label: "수익" },
+          { id: "attendance", label: "참석" },
           { id: "trend", label: "추이" },
           { id: "creatives", label: "소재" },
           { id: "adsets", label: "세트" },
@@ -321,12 +327,17 @@ export default async function DashboardPage() {
                   ? `${shortDate(g.startDate)} 집행 시작 · 알림신청 입력 대기`
                   : `CPA ${DOT[s.level]} 3일 이동 ${won(s.rolling3Cpa)} (캡 ${won(v.capToday)})`}
               </div>
-              {landing.signal !== "gray" && (
+              {landFixed ? (
+                <div className="r">
+                  착지 {num(landFixed)}명 (목표 대비 {pct((landFixed / g.targetLeads) * 100, 0)})
+                  {att && <> · 예상 참석 {num(landFixed * att.scenarios[1].low)}~{num(landFixed * att.scenarios[0].high)}명</>}
+                </div>
+              ) : landing.signal !== "gray" ? (
                 <div className="r">
                   착지 {LDOT[landing.signal]} 보수 {num(landing.conservative)} ~ 낙관 {num(landing.optimistic)} (기준{" "}
                   {num(landing.base)}) vs 목표 {num(g.targetLeads)} — {LMSG[landing.signal]}
                 </div>
-              )}
+              ) : null}
               {history.length > 0 && (
                 <div className="sighist">
                   {history.map((h) => (
@@ -464,17 +475,26 @@ export default async function DashboardPage() {
               </div>
             )}
 
-            {landing.base !== null && (
+            {landBase !== null && (
               <div className="card kpi">
                 <div className="label">
-                  예상 착지 <Tip text={`낙관 = 잔여예산 ÷ 3일CPA(${won(landing.cpa3)}) · 기준 = 잔여×0.95 ÷ 7일CPA(${won(landing.cpa7)})×k${landing.k.toFixed(2)} (스케일업 ${landing.scaleRatio ? "×" + landing.scaleRatio.toFixed(1) : "—"}) · 보수 = 잔여×0.90 ÷ 잔여플랜 CPA(${won(landing.planCpaRemaining)}). "계획 대비 %" 선형 외삽은 쓰지 않는다.`} />
+                  예상 착지 <Tip text={landFixed ? `확정 예상 착지 ${num(landFixed)}명. 산식 참고: 보수 ${num(landing.conservative)} ~ 낙관 ${num(landing.optimistic)}` : `낙관 = 잔여예산 ÷ 3일CPA(${won(landing.cpa3)}) · 기준 = 잔여×0.95 ÷ 7일CPA(${won(landing.cpa7)})×k${landing.k.toFixed(2)} · 보수 = 잔여×0.90 ÷ 잔여플랜 CPA(${won(landing.planCpaRemaining)})`} />
                 </div>
-                <div className="value">{num(landing.base)}<span className="unit">명</span></div>
+                <div className="value">{num(landBase)}<span className="unit">명</span></div>
                 <div className="foot">
-                  {num(landing.conservative)} ~ {num(landing.optimistic)}
-                  <span className={`chip ${landing.signal === "green" ? "pos" : landing.signal === "red" ? "neg" : "warn"}`}>
-                    {LDOT[landing.signal]} 목표 대비 {pct(((landing.base ?? 0) / g.targetLeads) * 100, 0)}
-                  </span>
+                  {landFixed ? (
+                    <>
+                      <span className="chip info">목표 대비 {pct((landFixed / g.targetLeads) * 100, 0)}</span>
+                      {att && <span className="chip">참석 {num(landFixed * att.scenarios[1].low)}~{num(landFixed * att.scenarios[0].high)}명</span>}
+                    </>
+                  ) : (
+                    <>
+                      {num(landing.conservative)} ~ {num(landing.optimistic)}
+                      <span className={`chip ${landing.signal === "green" ? "pos" : landing.signal === "red" ? "neg" : "warn"}`}>
+                        {LDOT[landing.signal]} 목표 대비 {pct(((landing.base ?? 0) / g.targetLeads) * 100, 0)}
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             )}
@@ -483,26 +503,6 @@ export default async function DashboardPage() {
 
         {/* 3.5 재계산 상태 — 가드레일 경고는 조용히 넘기지 않는다 */}
         {rpError && <div className="banner err">재계산 불가: {rpError}</div>}
-        {rp && rp.warnings.includes("BUDGET_EXHAUSTED") && (
-          <div className="banner err">🔴 잔여 예산 소진 — 집행 중단 검토</div>
-        )}
-        {rp && rp.warnings.includes("LOW_ALLOWED_CPA") && (
-          <div className="banner err">
-            🔴 예산 부족 — 허용 CPA {won(rp.allowedCPA)} &lt; ₩{num(g.replan?.minAllowedCpa ?? 8000)}. 목표 하향 필요
-            {rp.achievableLeads !== null && <> · 현 제약 하 달성 가능 최대 {num(rp.achievableLeads)}명</>}
-          </div>
-        )}
-        {rp && rp.warnings.includes("PHYSICAL_LIMIT") && (
-          <div className="banner err">
-            🔴 물리 한계 초과 — 필요 일평균 {num(rp.perDayNeeded)}명 &gt; {num(g.replan?.maxDailyLeads ?? 2200)}명. 목표 재협상 필요
-            {rp.achievableLeads !== null && <> · 달성 가능 최대 {num(rp.achievableLeads)}명</>}
-          </div>
-        )}
-        {rp && rp.achievableLeads !== null && !rp.warnings.length && (
-          <div className="banner warn">
-            ⚠ 가드레일 캡 적용으로 계획 총합이 잔여 목표에 못 미칩니다 — 달성 가능 최대 {num(rp.achievableLeads)}명
-          </div>
-        )}
         {replanLog.length > 0 && (
           <div className="section">
             <div className="card oneline">
@@ -542,9 +542,9 @@ export default async function DashboardPage() {
                   착지 시나리오 <Tip text="최저선 = 보수 착지 × 종합 하한 4.5% — 이중 낙관(낙관 착지 × 낙관 전환) 방지용 대표 하단. 상단 = 낙관 착지 × 상한 6.0%." />
                 </div>
                 <div className="revrows">
-                  <div><span>최저선</span><b>{eok((landing.conservative ?? 0) * rc.finalLow * g.aov)}</b><i>보수 {num(landing.conservative)} × {pct(rc.finalLow * 100, 1)}</i></div>
-                  <div><span>기준</span><b>{eok((landing.base ?? 0) * rc.finalBase * g.aov)}</b><i>기준 {num(landing.base)} × {pct(rc.finalBase * 100, 1)}</i></div>
-                  <div><span>상단</span><b>{eok((landing.optimistic ?? 0) * rc.finalHigh * g.aov)}</b><i>낙관 {num(landing.optimistic)} × {pct(rc.finalHigh * 100, 1)}</i></div>
+                  <div><span>최저선</span><b>{eok((landFixed ?? landing.conservative ?? 0) * rc.finalLow * g.aov)}</b><i>{landFixed ? "착지" : "보수"} {num(landFixed ?? landing.conservative)} × {pct(rc.finalLow * 100, 1)}</i></div>
+                  <div><span>기준</span><b>{eok((landFixed ?? landing.base ?? 0) * rc.finalBase * g.aov)}</b><i>{landFixed ? "착지" : "기준"} {num(landFixed ?? landing.base)} × {pct(rc.finalBase * 100, 1)}</i></div>
+                  <div><span>상단</span><b>{eok((landFixed ?? landing.optimistic ?? 0) * rc.finalHigh * g.aov)}</b><i>{landFixed ? "착지" : "낙관"} {num(landFixed ?? landing.optimistic)} × {pct(rc.finalHigh * 100, 1)}</i></div>
                 </div>
               </div>
             ) : (
@@ -556,6 +556,51 @@ export default async function DashboardPage() {
             )}
           </div>
         </div>
+
+        {/* 4.5 예상 웨비나 참석자 — 착지 × 전 프로모션 참석률 시나리오 */}
+        {att && landBase !== null && (
+          <div className="section" id="attendance">
+            <div className="eyebrow">
+              예상 웨비나 참석자{" "}
+              <span className="desc">착지 {num(landBase)}명 기준 · 전 프로모션 알림→참석률 실측</span>
+            </div>
+            <div className="grid grid-3">
+              {att.scenarios.map((sc, i) => (
+                <div key={sc.label} className="card rev">
+                  <div className="rlabel">{sc.label}</div>
+                  <div className="n">{num(landBase * sc.low)} ~ {num(landBase * sc.high)}<span className="unit" style={{ fontSize: 13, marginLeft: 3 }}>명</span></div>
+                  <div className="band">{sc.basis}</div>
+                  <span className={`corner ${i === 0 ? "goal" : ""}`}>{pct(sc.low * 100, 0)}~{pct(sc.high * 100, 0)}</span>
+                </div>
+              ))}
+            </div>
+            <div className="card oneline" style={{ marginTop: 10 }}>
+              <span className="ol-label">권장</span>
+              <span className="ol-main">
+                운영 준비(줌 정원·CS) <b>{num(att.opsLeads)}명</b> · 사업 계획 <b>{num(att.planLeads)}명</b>
+              </span>
+              <Tip text="운영은 상단 시나리오(고관여 타겟 유지), 사업 계획은 중립 시나리오 기준. 노마케터스 계열만 기수별 하락세 — 규모보다 타겟 질이 참석률을 결정." />
+            </div>
+            <details style={{ marginTop: 8 }}>
+              <summary>전 프로모션 참석률 벤치마크</summary>
+              <div className="card table-scroll" style={{ marginTop: 8 }}>
+                <table>
+                  <thead><tr><th>프로모션</th><th>오픈알림</th><th>참석률</th><th>비고</th></tr></thead>
+                  <tbody>
+                    {att.benchmarks.map((b) => (
+                      <tr key={b.name} className={b.name.startsWith("바이브코딩") ? "total" : ""}>
+                        <td>{b.name}</td>
+                        <td className="mono">{b.leads !== null ? num(b.leads) : "—"}</td>
+                        <td className="mono">{pct(b.rate * 100, 1)}</td>
+                        <td style={{ fontSize: 11.5, color: "hsl(var(--text-3))" }}>{b.note ?? ""}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </details>
+          </div>
+        )}
 
         {/* 5. 추이 차트 A~D */}
         <div className="section" id="trend">

@@ -15,6 +15,15 @@ export interface Goals {
   landing?: { kLookup: [number, number][]; baseHaircut: number; conservativeHaircut: number };
   // 게이트 (의사결정 포인트) — cum 게이트 기준값은 플랜 곡선의 해당일 누적에서 동적 계산
   gates?: GateDef[];
+  // 착지 고정값 (사용자 확정) — 있으면 산식 착지 대신 이 값을 대표로 쓴다
+  landingOverride?: number;
+  // 예상 웨비나 참석자 — 전 프로모션 알림→참석률 실측 기반 시나리오
+  attendance?: {
+    scenarios: { label: string; basis: string; low: number; high: number }[]; // 참석률 밴드
+    opsLeads: number;   // 운영 준비 기준 (줌 정원·CS)
+    planLeads: number;  // 사업 계획 기준
+    benchmarks: { name: string; leads: number | null; rate: number; note?: string }[];
+  };
   // 동적 재계산 가드레일 (lib/replan.ts)
   replan?: {
     dailySpendCap: number;    // 일 지출 절대 상한 (2,000만 — 한계 CPA가 알림 가치에 근접)
