@@ -8,7 +8,7 @@
       "120253615420350198",
       "120253690992100198"
     ],
-    "lastUpdated": "2026-09-08T00:06:30.621Z",
+    "lastUpdated": "2026-09-08T00:06:52.729673Z",
     "note": "원본값만 저장. 파생값은 프론트 계산. 2026-08-25 일별 목표 변경: 8/26~9/8 램프업/본집행/고점/마감 4구간, 한계 CPA 기준 운영. 미래 목표는 lib/replan.ts 동적 재계산 — 과거는 daily[].planSnapshot 동결. 대상 캠페인 3개(메인+서브+사본)."
   },
   "goals": {
@@ -213,6 +213,19 @@
     }
   ],
   "daily": [
+    {
+      "date": "2026-08-17",
+      "leads": 220,
+      "openTalkCum": null,
+      "spend": null,
+      "impressions": null,
+      "clicks": null,
+      "ctr": null,
+      "cpm": null,
+      "frequency": null,
+      "openEvents": null,
+      "note": "광고 시작 전 자연 유입 합계 (7/20~8/17, 어드민 목록 기준)"
+    },
     {
       "date": "2026-08-18",
       "leads": 110,
