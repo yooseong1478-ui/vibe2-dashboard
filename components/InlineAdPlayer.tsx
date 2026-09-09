@@ -4,6 +4,7 @@
 // (계정 토큰이 video 노드 권한이 없어 mp4 직재생 불가 — /api/preview 의 iframe 이 유일한 재생 수단.)
 // 메타 iframe 은 고정 픽셀(예: 335×450)로 오므로 카드 폭에 맞춰 transform: scale 로 줄인다.
 import { useEffect, useRef, useState } from "react";
+import { thumbSrc } from "@/lib/thumb";
 
 interface Props {
   adId?: string | null;
@@ -17,6 +18,8 @@ export default function InlineAdPlayer({ adId, thumb, isVideo, name }: Props) {
   const [frame, setFrame] = useState<{ src: string; w: number; h: number } | null>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const [boxW, setBoxW] = useState(0);
+  const [broken, setBroken] = useState(false);
+  const src = broken ? null : thumbSrc(adId, thumb);
 
   // 컨테이너 폭 추적 (반응형 스케일)
   useEffect(() => {
@@ -72,8 +75,8 @@ export default function InlineAdPlayer({ adId, thumb, isVideo, name }: Props) {
   }
 
   return (
-    <div ref={boxRef} className={`cthumb iap ${isVideo ? "video" : ""} ${!thumb ? "ph" : ""}`} onClick={play} role="button" title="카드 안에서 광고 재생">
-      {thumb ? <img src={thumb} alt={name} loading="lazy" /> : <span>{isVideo ? "🎬" : "🖼"}</span>}
+    <div ref={boxRef} className={`cthumb iap ${isVideo ? "video" : ""} ${!src ? "ph" : ""}`} onClick={play} role="button" title="카드 안에서 광고 재생">
+      {src ? <img src={src} alt={name} loading="lazy" onError={() => setBroken(true)} /> : <span>{isVideo ? "🎬" : "🖼"}</span>}
       {adId && (
         <span className={`play iap-play ${state === "loading" ? "loading" : ""}`}>
           {state === "loading" ? "…" : "▶"}

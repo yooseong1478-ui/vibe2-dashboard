@@ -5,6 +5,7 @@
 // transform 을 남겨 조상이 fixed 의 containing block 이 되므로, 섹션 안에 그리면
 // 모달이 문서 좌표에 박혀 화면 밖(스크롤 위치에 따라 잘리거나 안 보임)으로 나간다.
 import { useEffect, useState } from "react";
+import { thumbSrc } from "@/lib/thumb";
 import { createPortal } from "react-dom";
 
 export interface AdPreviewStats {
@@ -69,8 +70,8 @@ export default function AdPreviewModal({ adId, name, thumb, isVideo, on, stats, 
         <div className={`lbimg ${html ? "haspreview" : ""}`}>
           {html ? (
             <div className="lbpreview" dangerouslySetInnerHTML={{ __html: html }} />
-          ) : thumb ? (
-            <img src={thumb} alt={name} />
+          ) : thumbSrc(adId, thumb) ? (
+            <img src={thumbSrc(adId, thumb) as string} alt={name} />
           ) : (
             <div className="cthumb ph"><span>{isVideo ? "🎬" : "🖼"}</span></div>
           )}

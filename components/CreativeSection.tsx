@@ -4,6 +4,7 @@ import AdPreviewModal from "./AdPreviewModal";
 import InlineAdPlayer from "./InlineAdPlayer";
 import type { CreativesBlock, CreativeItem, CreativeMetrics } from "@/lib/types";
 import { won, num, pct, shortDate } from "@/lib/format";
+import { thumbSrc } from "@/lib/thumb";
 
 type Period = "cumulative" | "latest";
 
@@ -22,7 +23,8 @@ function isOn(status: string) {
 function Thumb({ item }: { item: CreativeItem }) {
   const [broken, setBroken] = useState(false);
   const isVideo = item.objectType === "VIDEO";
-  if (!item.thumb || broken) {
+  const src = thumbSrc(item.adId, item.thumb);
+  if (!src || broken) {
     return (
       <div className={`cthumb ph ${isVideo ? "video" : ""}`}>
         <span>{isVideo ? "🎬" : "🖼"}</span>
@@ -32,7 +34,7 @@ function Thumb({ item }: { item: CreativeItem }) {
   return (
     <div className={`cthumb ${isVideo ? "video" : ""}`}>
       {/* fbcdn 이미지: 토큰 없음. 만료/실패 시 플레이스홀더로 폴백 */}
-      <img src={item.thumb} alt={item.name} loading="lazy" onError={() => setBroken(true)} />
+      <img src={src} alt={item.name} loading="lazy" onError={() => setBroken(true)} />
       {isVideo && <span className="play">▶</span>}
     </div>
   );
